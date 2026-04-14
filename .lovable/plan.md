@@ -1,47 +1,54 @@
 
 
-# UX Polish — Toasts, Skeletons, Empty States & Tooltips
+# UX Polish — Skeletons, Toasts de Estado y Empty States
 
-## Audit of Current State
-
-- **Sonner toasts**: Already installed and used across Settings, CEO, PM, and DataIngestionModal. All key actions already have toast feedback.
-- **WorkspaceSkeleton**: Already exists at `src/components/njm/WorkspaceSkeleton.tsx` for generic card loading.
-- **Tooltips**: Shadcn Tooltip already used in PM workspace for artifact status/framework info.
-
-## What's Missing
-
-| Gap | Description |
-|-----|-------------|
-| Hub Empty State | No visual feedback when all brands are filtered out or list is empty |
-| Dashboard Skeleton for Hub | WorkspaceSkeleton exists but isn't wired into the Hub view |
-| Strategic Term Tooltips | CEO vectors and PM artifacts reference frameworks (Ansoff, Porter, OKR, Jobs-to-be-Done) with no contextual definitions |
-
-## Plan (3 changes)
-
-### 1. Empty State Component + Hub Integration
-
-Create a reusable `EmptyState` component with a Lucide icon, title, description, and optional CTA button. Integrate it into `AgencyHubView.tsx` to show when filtered brands list is empty (both for "no brands at all" and "no matches for current filter").
-
-**Files**: Create `src/components/njm/EmptyState.tsx`, modify `AgencyHubView.tsx`
-
-### 2. Skeleton Loading Simulation in Hub
-
-Add a brief simulated loading state to `AgencyHubView` using the existing `WorkspaceSkeleton` component. This creates the infrastructure for real API loading states later.
-
-**Files**: Modify `AgencyHubView.tsx`
-
-### 3. Strategic Term Tooltips in CEO & PM
-
-Add contextual `<Tooltip>` components next to strategic terms:
-
-- **CEO workspace**: Add info icon with tooltip next to vector category labels (Core, Business, Brand, Growth) explaining what each category covers.
-- **PM workspace**: Add tooltip definitions next to artifact framework names (Ansoff Matrix, Lean Canvas, Porter's Five Forces, OKR Framework, NOW-NEXT-LATER, GTM Playbook, Jobs-to-be-Done).
-
-Definitions will be stored in a small lookup map. Tooltips use the existing Shadcn Tooltip with `glass-strong border-none` styling for dark mode consistency.
-
-**Files**: Modify `CEOWorkspaceView.tsx`, `PMWorkspaceView.tsx`
+3 mejoras de pulido visual. Sin dependencias nuevas.
 
 ---
 
-Total: 1 new file, 3 modified files. No new dependencies.
+## 1. Skeleton Screens en CEO y PM
+
+Al navegar entre CEO y PM, simular un loading de 500ms mostrando `WorkspaceSkeleton` antes de renderizar el contenido real. Mismo patrón que ya usa `AgencyHubView` con `useState(true)` + `useEffect` timer.
+
+**Archivos a modificar**: `CEOWorkspaceView.tsx`, `PMWorkspaceView.tsx`
+- Agregar `const [isLoading, setIsLoading] = useState(true)` + `useEffect` con 500ms timer
+- Si `isLoading`, retornar `<WorkspaceSkeleton />` con configuración apropiada (CEO: 8 cards, PM: 6 cards en 3 columnas)
+- El skeleton se muestra antes de cualquier otra lógica (brand not found, locked, etc.)
+
+---
+
+## 2. Toasts de Estado por Agente
+
+Agregar toasts más descriptivos y con emoji cuando los agentes completan acciones. Ya existe infraestructura con `sonner`.
+
+**Archivos a modificar**: `BrandContext.tsx`
+- En `runCEOAudit`: al completar cada step, emitir toast con detalle: `toast.success("✅ CEO: Auditoría de vectores completada", { description: "8 vectores estratégicos analizados para {brandName}" })`
+- En `runPMExecution`: al completar cada step intermedio, emitir toast informativo: `toast("📊 PM: Evaluando Framework Ansoff...")`, y al final toast de éxito: `toast.success("✅ PM: Análisis Porter generado con éxito")`
+- En `signLibroVivo`: agregar toast `toast.success("✅ CEO: Libro Vivo firmado y sellado")`
+- En `toggleVector` / `validateAllVectors`: agregar toast de confirmación
+
+**Archivos a modificar**: `BrandContext.tsx`
+
+---
+
+## 3. Empty States Profesionales
+
+Mejorar los estados vacíos existentes con mensajes específicos por contexto.
+
+**Archivos a modificar**: `PMWorkspaceView.tsx`, `CEOWorkspaceView.tsx`
+- **PM bloqueado** (ya existe pero mejorar): Cambiar el mensaje a "El Agente PM está esperando la firma del Libro Vivo para empezar a operar. Dirígete al workspace del CEO para completar la validación." Usar el componente `EmptyState` existente con icono `Lock`.
+- **CEO sin vectores**: Agregar empty state si `getVectors()` retorna array vacío, usando `EmptyState` con icono `Inbox` y CTA "Iniciar Auditoría".
+- **PM sin artefactos completados**: Mostrar empty state contextual cuando todos los artifacts están en "Pendiente".
+
+---
+
+## Resumen
+
+| Archivo | Cambio |
+|---------|--------|
+| `CEOWorkspaceView.tsx` | Skeleton loading + empty state sin vectores |
+| `PMWorkspaceView.tsx` | Skeleton loading + empty state mejorado (bloqueado + sin artefactos) |
+| `BrandContext.tsx` | Toasts descriptivos en signLibroVivo, runCEOAudit, runPMExecution |
+
+Total: 3 archivos modificados. Sin archivos nuevos.
 
