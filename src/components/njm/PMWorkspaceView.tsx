@@ -1,9 +1,18 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Briefcase, FileText, Zap, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getBrand, getArtifactsForBrand } from "@/data/brands";
 import { DocumentSheet } from "@/components/njm/DocumentSheet";
+import { useBrandContext } from "@/context/BrandContext";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 
 const statusConfig: Record<string, { color: string; dot: string }> = {
   Completado: { color: "bg-pm/20 text-pm-fg", dot: "bg-pm" },
@@ -15,6 +24,7 @@ export function PMWorkspaceView() {
   const { id } = useParams<{ id: string }>();
   const brand = getBrand(id || "");
   const artifacts = getArtifactsForBrand(id || "");
+  const { isLibroVivoComplete } = useBrandContext();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeArtifact, setActiveArtifact] = useState<typeof artifacts[0] | null>(null);
 
@@ -27,9 +37,9 @@ export function PMWorkspaceView() {
   }
 
   // Locked state if Libro Vivo not complete
-  if (!brand.libroVivoComplete) {
+  if (!isLibroVivoComplete(id || "")) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4">
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 animate-fade-in">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl glass">
           <Lock className="h-8 w-8 text-muted-foreground" />
         </div>
@@ -49,8 +59,27 @@ export function PMWorkspaceView() {
   };
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto scrollbar-thin">
+    <div className="flex flex-1 flex-col overflow-auto scrollbar-thin animate-fade-in">
       <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
+        <Breadcrumb className="mb-3">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/" className="text-muted-foreground hover:text-foreground">Hub</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to={`/brand/${id}/ceo`} className="text-muted-foreground hover:text-foreground">{brand.name}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Agente PM</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl glass bg-pm/10">
             <Briefcase className="h-5 w-5 text-pm-fg" />
@@ -66,7 +95,7 @@ export function PMWorkspaceView() {
 
       <main className="flex-1 p-8 pb-24">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {artifacts.map((a) => {
+          {artifacts.map((a, i) => {
             const cfg = statusConfig[a.status];
             const clickable = a.status === "Completado";
             return (
@@ -80,6 +109,7 @@ export function PMWorkspaceView() {
                         ? "cursor-pointer hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]"
                         : "cursor-default opacity-70"
                     }`}
+                    style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
                   >
                     <div className="flex items-start justify-between">
                       <FileText className="h-5 w-5 text-muted-foreground" />

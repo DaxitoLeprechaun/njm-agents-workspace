@@ -12,7 +12,7 @@ export function AgencyHubView() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto scrollbar-thin">
+    <div className="flex flex-1 flex-col overflow-auto scrollbar-thin animate-fade-in">
       <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           NJM OS<br />
@@ -23,11 +23,12 @@ export function AgencyHubView() {
 
       <main className="flex-1 p-8">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {brands.map((brand) => (
+          {brands.map((brand, i) => (
             <button
               key={brand.id}
               onClick={() => navigate(`/brand/${brand.id}/ceo`)}
               className="group relative rounded-2xl p-5 text-left transition-all duration-300 glass hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]"
+              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
             >
               <div className="flex items-start justify-between">
                 <div>
