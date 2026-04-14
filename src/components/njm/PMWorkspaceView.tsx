@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Briefcase, FileText, Zap, Lock } from "lucide-react";
+import { Briefcase, FileText, Zap, Lock, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getBrand, getArtifactsForBrand } from "@/data/brands";
 import { DocumentSheet } from "@/components/njm/DocumentSheet";
@@ -15,6 +15,16 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+
+const FRAMEWORK_DEFINITIONS: Record<string, string> = {
+  "Ansoff Matrix": "Herramienta estratégica para planificar crecimiento: penetración de mercado, desarrollo de mercado/producto y diversificación.",
+  "Lean Canvas": "Modelo de una página para validar hipótesis de negocio: problema, solución, métricas clave y ventaja competitiva.",
+  "Porter's Five Forces": "Análisis de las 5 fuerzas competitivas de una industria: rivalidad, poder de proveedores/clientes, amenaza de sustitutos y nuevos entrantes.",
+  "OKR Framework": "Objectives & Key Results — metodología para definir objetivos ambiciosos con resultados medibles en ciclos trimestrales.",
+  "NOW-NEXT-LATER": "Roadmap priorizado en 3 horizontes: NOW (en ejecución), NEXT (próximo ciclo) y LATER (visión futura).",
+  "GTM Playbook": "Go-To-Market Playbook — estrategia de lanzamiento que define segmento, canales, messaging y plan de activación.",
+  "Jobs-to-be-Done": "Framework centrado en el 'trabajo' que el cliente necesita realizar, no en demografía o features del producto.",
+};
 
 const statusConfig: Record<string, { color: string; dot: string }> = {
   Completado: { color: "bg-pm/20 text-pm-fg", dot: "bg-pm" },
@@ -133,15 +143,22 @@ export function PMWorkspaceView() {
                     <p className="mt-1 text-xs text-muted-foreground">{a.description}</p>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="glass-strong border-none">
-                  <div className="text-xs">
+                <TooltipContent side="top" className="glass-strong border-none max-w-[260px]">
+                  <div className="text-xs space-y-1">
                     <p>
                       <span className="font-medium">Estado:</span> {a.status}
                     </p>
                     {a.framework && (
-                      <p>
-                        <span className="font-medium">Framework:</span> {a.framework}
-                      </p>
+                      <>
+                        <p>
+                          <span className="font-medium">Framework:</span> {a.framework}
+                        </p>
+                        {FRAMEWORK_DEFINITIONS[a.framework] && (
+                          <p className="text-muted-foreground pt-1 border-t border-white/10">
+                            {FRAMEWORK_DEFINITIONS[a.framework]}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </TooltipContent>
