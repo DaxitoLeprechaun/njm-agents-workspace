@@ -1,28 +1,31 @@
 import { Outlet } from "react-router-dom";
 import { AppSidebar } from "@/components/njm/AppSidebar";
+import { BrandProvider } from "@/context/BrandContext";
 import natureBg from "@/assets/nature-bg.jpg";
 
 export default function AppLayout() {
   return (
-    <div className="relative flex h-screen w-full overflow-hidden">
-      {/* Nature background */}
-      <img
-        src={natureBg}
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
-        width={1920}
-        height={1080}
-      />
-      {/* Soft overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-sky-100/30" />
+    <BrandProvider>
+      <div className="relative flex h-screen w-full overflow-hidden">
+        {/* Nature background */}
+        <img
+          src={natureBg}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          width={1920}
+          height={1080}
+        />
+        {/* Soft overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-sky-100/30" />
 
-      {/* App shell */}
-      <div className="relative z-10 flex h-full w-full">
-        <AppSidebar />
-        <div className="flex flex-1 overflow-hidden">
-          <Outlet />
+        {/* App shell */}
+        <div className="relative z-10 flex h-full w-full">
+          <AppSidebar />
+          <div className="flex flex-1 overflow-hidden">
+            <Outlet />
+          </div>
         </div>
       </div>
-    </div>
+    </BrandProvider>
   );
 }

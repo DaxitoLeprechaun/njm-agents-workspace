@@ -6,6 +6,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { toast } from "sonner";
 import type { Artifact } from "@/data/brands";
 
 interface DocumentSheetProps {
@@ -45,6 +46,13 @@ mercado objetivo para 2025.
 
 export function DocumentSheet({ open, onOpenChange, artifact }: DocumentSheetProps) {
   if (!artifact) return null;
+
+  const handleApprove = () => {
+    toast.success("Documento aprobado y guardado", {
+      description: `"${artifact.name}" ha sido aprobado exitosamente.`,
+    });
+    onOpenChange(false);
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -94,6 +102,7 @@ export function DocumentSheet({ open, onOpenChange, artifact }: DocumentSheetPro
             Proponer Ajustes
           </button>
           <button
+            onClick={handleApprove}
             className="rounded-xl px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg"
             style={{ background: "hsla(160, 84%, 39%, 0.85)", backdropFilter: "blur(20px)" }}
           >
