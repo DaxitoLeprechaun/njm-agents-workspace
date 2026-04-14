@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, Briefcase, BookOpen, TrendingUp, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ShieldCheck, Briefcase, BookOpen } from "lucide-react";
 import { getBrand } from "@/data/brands";
 import { useBrandContext } from "@/context/BrandContext";
 import {
@@ -10,33 +10,8 @@ export function BrandOverviewView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const brand = getBrand(id || "");
-  const { getVectors, isLibroVivoComplete } = useBrandContext();
-  const vectors = getVectors(id || "");
-  const validated = vectors.filter((v) => v.validated).length;
-  const total = vectors.length;
-  const pct = total > 0 ? Math.round((validated / total) * 100) : 0;
+  const { isLibroVivoComplete } = useBrandContext();
   const libroSigned = isLibroVivoComplete(id || "");
-
-  if (!brand) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-muted-foreground">Marca no encontrada</p>
-      </div>
-    );
-  }
-
-  const workspaces = [
-    { label: "Agente CEO", desc: "Guardián del ADN · Vectores Estratégicos", icon: ShieldCheck, color: "ceo", path: `/brand/${id}/ceo` },
-    { label: "Agente PM", desc: "Operativo · Entregables y Frameworks", icon: Briefcase, color: "pm", path: `/brand/${id}/pm` },
-    ...(libroSigned
-      ? [{ label: "Libro Vivo", desc: "Fuente de verdad estratégica", icon: BookOpen, color: "pm" as const, path: `/brand/${id}/libro-vivo` }]
-      : []),
-  ];
-
-  // SVG ring
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (brand.health / 100) * circumference;
 
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin animate-fade-in">
