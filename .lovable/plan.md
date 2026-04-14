@@ -1,97 +1,62 @@
 
 
-# NJM OS — 3 Módulos: Día Cero, Alta de Marca, y Dashboard de Pendientes
+# Agent Hub — Dashboard Dinámico del Agente CEO (Dual-Phase)
 
 ## Context
 
-The app already has: Login, Agency Hub with brand cards, CEO/PM workspaces, Settings, DataIngestionModal with drag-and-drop. The new modules add a pre-Hub onboarding layer and enhance brand creation and triage workflows.
+The current `CEOWorkspaceView` shows vectors in a flat grid. This redesign introduces a **two-phase UI** based on `agentHealth` (derived from vector validation percentage):
+
+- **Phase 1 (Setup)**: Health < 100% — diagnostic/onboarding mode with health metric, pending tasks list, and urgent action card
+- **Phase 2 (Operational)**: Health = 100% — collapsed command bar + PM initialization workspace
+
+The existing vector validation logic, audit system, and Libro Vivo signing remain intact.
 
 ---
 
-## Módulo 1: "Día Cero" — Onboarding Wizard
+## Architecture
 
-A new page/view that shows when the agency has not been configured yet. Uses localStorage flag `njm-agency-setup`.
+`agentHealth` is computed from existing data: `(validatedVectors / totalVectors) * 100`. No new state needed — it's a derived value from `getVectors()`.
 
-**Create** `src/components/njm/DayCeroView.tsx`:
-- **Empty State**: Centered screen with `Hexagon` icon, "Ningún espacio de trabajo detectado", and "Inicializar Agencia" button
-- **Wizard** (4 steps in a full-width modal/overlay):
-  - Step 1: Agency Name (`Building` icon + Input)
-  - Step 2: Main Objectives (`Target` icon + Textarea)
-  - Step 3: Operation Style (`Layers` icon + tag selector with options: "Consultivo", "Operativo", "Híbrido", "Automatizado")
-  - Step 4: Values/Mission (`Heart` icon + Textarea)
-- Navigation: "Siguiente", "Atrás", "Completar Setup" buttons
-- On complete: save to localStorage, toast success, redirect to Hub
-- Step indicator: numbered dots with active state using `glass` styling
+`pendingTasks` maps to unvalidated vectors (each pending vector = a task like "Validar Identidad Visual").
 
-**Create** `src/context/AgencyContext.tsx`:
-- Store agency profile (name, objectives, style, values)
-- `isSetupComplete` boolean
-- Persist to localStorage
-
-**Modify** `src/pages/Index.tsx`:
-- Check `isSetupComplete` — if false, render `<DayCeroView />` instead of `<AgencyHubView />`
+The Phase 2 PM initialization panel is purely UI — it uses existing `signLibroVivo` and navigation patterns.
 
 ---
 
-## Módulo 2: Alta de Marca con Motor de Ingesta Dual
+## Changes
 
-Enhanced brand creation flow with two distinct dropzones.
+### 1. Rewrite `CEOWorkspaceView.tsx`
 
-**Create** `src/components/njm/NewBrandModal.tsx`:
-- Full-width `Dialog` with two sections:
-  - **Sección 1 — Datos Base**: Name (`Building`), Industry/Sector (`Briefcase`), Short Description (`FileText`) — all with glassmorphism inputs
-  - **Sección 2 — Motor de Ingesta**: Two visually distinct dropzones side by side:
-    - **Dropzone A** "Ingesta Visual & Brandbook" (`Palette` icon, dashed border with `ceo` color accent) — accepts images, PDFs for logos/palettes/typography
-    - **Dropzone B** "Ingesta Estratégica & Contexto" (`BookOpen` icon, dashed border with `pm` color accent) — accepts docs for manuals, sales history, briefs
-  - Each dropzone: drag hover state, file list with remove buttons, file size display
-- "Crear Marca" button, toast on success
-- Reuses existing drag-and-drop patterns from `DataIngestionModal`
+**Phase 1 (Setup) — Top section**: 3-card grid:
+- **Card 1 — Health Metric**: SVG circular progress ring (reuse pattern from `BrandOverviewView`) showing `agentHealth%`. Text: "Requiere configuración para operar" when < 100%.
+- **Card 2 — Triaje / Pendientes**: Compact checklist of pending vectors with gray/green checkmarks. Each item shows vector name + category.
+- **Card 3 — Acción Urgente**: Highlighted card (ceo accent border) showing the first pending vector as urgent task. Contains "Iniciar Onboarding" button that opens `DataIngestionModal` and a small drag-and-drop zone.
 
-**Modify** `src/components/njm/AgencyHubView.tsx`:
-- Wire the "Agregar Marca" button to open `<NewBrandModal />`
+Below the 3 cards: the existing vector grid with filters (preserved from current implementation).
 
-**Modify** `src/context/BrandContext.tsx`:
-- Add `addBrand(brand)` function to dynamically add brands to state
-- New brands start with `status: "En Setup"`, `health: 0`
+**Phase 2 (Operational) — When health = 100%**:
+- Top 3 cards collapse into a single horizontal bar: "Agente CEO: Operativo (100%)" with a "Ver Configuración" toggle button to expand/collapse the detail view.
+- Below the bar: **PM Initialization Workspace** panel with:
+  - Tag selectors for "Habilidades del PM" (Análisis Competitivo, Research, Generación de Contenido, Roadmapping)
+  - Slider or radio for "Nivel de Autonomía" (Supervisado, Semi-Autónomo, Autónomo)
+  - "Inicializar Agente PM" terminal-style button (triggers `signLibroVivo` if not signed, or navigates to PM workspace)
+- The Libro Vivo signing button integrates naturally into this workspace.
 
----
+**State**: Add `showConfig` boolean toggle for the collapse/expand in Phase 2. Add `pmSkills` and `pmAutonomy` local state for the PM setup form.
 
-## Módulo 3: Dashboard de Pendientes (Triaje)
+**Transition**: Use Tailwind `transition-all duration-500` for the card collapse animation. Cards use `max-h-0 overflow-hidden` when collapsed vs `max-h-[400px]` when expanded.
 
-Enhance brand cards with granular status badges and contextual CTAs.
+### 2. Minor update to `BrandContext.tsx`
 
-**Create** `src/data/brandTriage.ts`:
-- Type: `BrandTriageStatus = 'pending_interview' | 'missing_docs' | 'ready_for_research' | 'complete'`
-- Badge config map: label, color, icon for each status
-- Mock triage data per brand
-
-**Modify** `src/components/njm/AgencyHubView.tsx`:
-- Add triage badges to each brand card:
-  - "Falta Ingesta Documental" (amber badge) — when no docs uploaded
-  - "Entrevista Pendiente" (orange badge) — when interview not done
-  - "Falta Investigación de Mercado" (slate badge) — when research not started
-- Add contextual CTA button per card:
-  - If `pending_interview` → "Completar Entrevista"
-  - If `missing_docs` → "Subir Documentos"
-  - If `ready_for_research` → "Iniciar Análisis Agéntico" with `Sparkles` icon
-  - If `complete` → "Ver Dashboard"
-- Add circular "Agent Readiness" indicator replacing or alongside the existing health bar
-- High-density layout inspired by Vercel/Linear aesthetic
+No changes needed — `agentHealth` is derived client-side from existing `getVectors()`.
 
 ---
 
-## Summary
+## File Summary
 
-| File | Action | Module |
-|------|--------|--------|
-| `src/components/njm/DayCeroView.tsx` | Create | 1 |
-| `src/context/AgencyContext.tsx` | Create | 1 |
-| `src/components/njm/NewBrandModal.tsx` | Create | 2 |
-| `src/data/brandTriage.ts` | Create | 3 |
-| `src/pages/Index.tsx` | Modify | 1 |
-| `src/components/njm/AgencyHubView.tsx` | Modify | 2, 3 |
-| `src/context/BrandContext.tsx` | Modify | 2 |
-| `src/layouts/AppLayout.tsx` | Modify | 1 (wrap AgencyProvider) |
+| File | Action |
+|------|--------|
+| `src/components/njm/CEOWorkspaceView.tsx` | Rewrite with dual-phase UI |
 
-Total: 4 new files, 4 modified. No new dependencies.
+Total: 1 file modified. No new files, no new dependencies.
 
