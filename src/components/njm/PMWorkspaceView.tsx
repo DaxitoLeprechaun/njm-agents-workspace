@@ -140,7 +140,20 @@ export function PMWorkspaceView() {
                       </span>
                     </div>
                     <h3 className="mt-3 font-semibold text-foreground">{a.name}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">{a.description}</p>
+                    <div className="mt-1 flex items-center gap-1.5">
+                      <p className="text-xs text-muted-foreground">{a.description}</p>
+                      {a.framework && FRAMEWORK_DEFINITIONS[a.framework] && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3 w-3 shrink-0 text-muted-foreground/40 hover:text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="glass-strong border-none max-w-[220px]">
+                            <p className="text-xs font-medium mb-1">{a.framework}</p>
+                            <p className="text-xs text-muted-foreground">{FRAMEWORK_DEFINITIONS[a.framework]}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="glass-strong border-none max-w-[260px]">
