@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Settings, Key, FolderOpen, Building, Eye, EyeOff, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings, Key, FolderOpen, Building, Eye, EyeOff, Trash2, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { brands as allBrands } from "@/data/brands";
 import { toast } from "sonner";
 import {
@@ -16,10 +17,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+function getInitialDark(): boolean {
+  if (typeof window === "undefined") return false;
+  const stored = localStorage.getItem("njm-theme");
+  if (stored) return stored === "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
 export function SettingsView() {
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [exportPath, setExportPath] = useState("/Users/tu-usuario/NJM_OS/Marcas/");
+  const [isDark, setIsDark] = useState(getInitialDark);
   const [brandNames, setBrandNames] = useState<Record<string, string>>(() => {
     const names: Record<string, string> = {};
     allBrands.forEach((b) => (names[b.id] = b.name));
@@ -28,6 +37,25 @@ export function SettingsView() {
   const [activeBrands, setActiveBrands] = useState<Set<string>>(
     () => new Set(allBrands.map((b) => b.id))
   );
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.add("dark");
+      localStorage.setItem("njm-theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("njm-theme", "light");
+    }
+  }, [isDark]);
+
+  // Apply saved theme on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("njm-theme");
+    if (stored === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
 
   const handleSave = () => {
     toast.success("Configuración guardada correctamente");
@@ -45,13 +73,22 @@ export function SettingsView() {
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin animate-fade-in">
       <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl glass">
-            <Settings className="h-5 w-5 text-foreground" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl glass">
+              <Settings className="h-5 w-5 text-foreground" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">Configuración</h1>
+              <p className="text-sm text-muted-foreground">Ajustes globales del sistema NJM OS</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">Configuración</h1>
-            <p className="text-sm text-muted-foreground">Ajustes globales del sistema NJM OS</p>
+
+          {/* Dark mode toggle in header */}
+          <div className="flex items-center gap-3">
+            <Sun className="h-4 w-4 text-muted-foreground" />
+            <Switch checked={isDark} onCheckedChange={setIsDark} />
+            <Moon className="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
       </header>
@@ -172,8 +209,7 @@ export function SettingsView() {
           <div className="mt-8 flex justify-end">
             <button
               onClick={handleSave}
-              className="rounded-xl px-6 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:shadow-xl hover:scale-105"
-              style={{ background: "hsla(210, 100%, 52%, 0.85)" }}
+              className="rounded-xl px-6 py-2.5 text-sm font-medium text-primary-foreground bg-primary shadow-lg transition-all hover:shadow-xl hover:scale-105"
             >
               Guardar Configuración
             </button>
