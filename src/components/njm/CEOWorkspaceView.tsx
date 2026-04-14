@@ -33,6 +33,12 @@ export function CEOWorkspaceView() {
   const { getVectors, toggleVector, isLibroVivoComplete, signLibroVivo, isScanning, scanningVectorId, executionSteps, runCEOAudit } = useBrandContext();
   const vectors = getVectors(id || "");
 
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const allValidated = vectors.length > 0 && vectors.every((v) => v.validated);
 
   // Filter state
@@ -87,10 +93,28 @@ export function CEOWorkspaceView() {
     });
   };
 
+  if (isLoading) {
+    return <WorkspaceSkeleton cards={8} columns="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />;
+  }
+
   if (!brand) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <p className="text-muted-foreground">Marca no encontrada</p>
+      </div>
+    );
+  }
+
+  if (vectors.length === 0) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <EmptyState
+          icon={Inbox}
+          title="Sin vectores estratégicos"
+          description="Esta marca aún no tiene vectores definidos. Inicia una auditoría para generar el ADN estratégico."
+          actionLabel="Iniciar Auditoría"
+          onAction={() => runCEOAudit(id || "")}
+        />
       </div>
     );
   }
