@@ -7,6 +7,8 @@ import AppLayout from "@/layouts/AppLayout";
 import Index from "./pages/Index";
 import CEOPage from "./pages/CEOPage";
 import PMPage from "./pages/PMPage";
+import LibroVivoPage from "./pages/LibroVivoPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/brand/:id/ceo" element={<CEOPage />} />
             <Route path="/brand/:id/pm" element={<PMPage />} />
+            <Route path="/brand/:id/libro-vivo" element={<LibroVivoPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

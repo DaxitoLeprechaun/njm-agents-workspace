@@ -4,7 +4,9 @@ import { Briefcase, FileText, Zap, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getBrand, getArtifactsForBrand } from "@/data/brands";
 import { DocumentSheet } from "@/components/njm/DocumentSheet";
+import { ExecutionConsole } from "@/components/njm/ExecutionConsole";
 import { useBrandContext } from "@/context/BrandContext";
+import { toast } from "sonner";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -24,7 +26,7 @@ export function PMWorkspaceView() {
   const { id } = useParams<{ id: string }>();
   const brand = getBrand(id || "");
   const artifacts = getArtifactsForBrand(id || "");
-  const { isLibroVivoComplete } = useBrandContext();
+  const { isLibroVivoComplete, runPMExecution, isPMRunning, pmExecutionSteps } = useBrandContext();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeArtifact, setActiveArtifact] = useState<typeof artifacts[0] | null>(null);
 
@@ -36,7 +38,6 @@ export function PMWorkspaceView() {
     );
   }
 
-  // Locked state if Libro Vivo not complete
   if (!isLibroVivoComplete(id || "")) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 animate-fade-in">
@@ -56,6 +57,14 @@ export function PMWorkspaceView() {
   const handleOpenArtifact = (artifact: typeof artifacts[0]) => {
     setActiveArtifact(artifact);
     setSheetOpen(true);
+  };
+
+  const handlePMExecute = () => {
+    runPMExecution(() => {
+      toast.success("Ejecución táctica completada", {
+        description: "El Agente PM ha finalizado el análisis y generación de artefactos.",
+      });
+    });
   };
 
   return (
@@ -145,11 +154,15 @@ export function PMWorkspaceView() {
       {/* Floating action */}
       <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
         <button
-          className="flex items-center gap-2 rounded-full px-6 py-3 font-medium text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105"
+          onClick={handlePMExecute}
+          disabled={isPMRunning}
+          className={`flex items-center gap-2 rounded-full px-6 py-3 font-medium text-white shadow-xl transition-all duration-300 ${
+            isPMRunning ? "opacity-50 cursor-not-allowed" : "hover:shadow-2xl hover:scale-105"
+          }`}
           style={{ background: "hsla(160, 84%, 39%, 0.85)", backdropFilter: "blur(20px)" }}
         >
-          <Zap className="h-4 w-4" />
-          Consultar PM / Ejecutar Táctica
+          <Zap className={`h-4 w-4 ${isPMRunning ? "animate-pulse" : ""}`} />
+          {isPMRunning ? "Ejecutando…" : "Consultar PM / Ejecutar Táctica"}
         </button>
       </div>
 
@@ -158,6 +171,13 @@ export function PMWorkspaceView() {
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         artifact={activeArtifact}
+      />
+
+      {/* Execution Console */}
+      <ExecutionConsole
+        visible={isPMRunning || pmExecutionSteps.length > 0}
+        steps={pmExecutionSteps}
+        agentLabel="Agente PM"
       />
     </div>
   );
