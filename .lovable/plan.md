@@ -1,93 +1,68 @@
 
 
-# Modo Gestión del CEO — Dashboard Dual + Pull Request View + Terminal Log + Bottlenecks + Autonomía
+# CEO Dashboard — 4 Nucleos Principales
 
 ## Resumen
 
-Cuando todos los vectores están validados (Phase 2 / 100%), el CEO workspace se transforma en un "Modo Gestión" con dos columnas principales, un sistema de revisión tipo Pull Request, una consola de razonamiento, indicadores de cuello de botella, y un slider de autonomía por agente.
+Reorganizar el Phase 2 (Modo Gestion) del CEO en **4 modulos visuales** claros, reemplazando el layout actual de 2 columnas + autonomy slider suelto.
 
----
-
-## Arquitectura de Datos
-
-**Nuevos tipos y mock data** en `src/data/ceoManagement.ts`:
-
-```typescript
-interface CEOTask {
-  id: string; type: 'analysis' | 'structure' | 'strategy' | 'delegation';
-  title: string; description: string; priority: 'high' | 'medium' | 'low';
-}
-
-interface PMSubmission {
-  id: string; taskName: string; framework: string;
-  submittedAt: Date; // relative time display
-  status: 'pending' | 'approved' | 'rejected';
-  reasoning: string;  // "Basado en framework SOSTAC..."
-  resultPreview: string; // markdown-like content
-}
+```text
+┌─────────────────────────────────────────────────────┐
+│  HEADER (breadcrumb + titulo)                       │
+├─────────────────────────────────────────────────────┤
+│  NUCLEO 1: Estado del Agente CEO                    │
+│  [Salud 100%] [Ver Libro] [Consola] [Config]        │
+│  Autonomia slider + config colapsable               │
+├───────────────────────┬─────────────────────────────┤
+│  NUCLEO 2:            │  NUCLEO 3:                  │
+│  Tareas Pendientes    │  Pendientes por Aprobar     │
+│  (Roadmap del CEO +   │  (Bandeja de Revision       │
+│   delegaciones al PM) │   del PM)                   │
+├───────────────────────┴─────────────────────────────┤
+│  NUCLEO 4: Core de Contrataciones                   │
+│  [Agente PM ✓ Activo] [Agente MKT 🔒] [Agente X 🔒]│
+│  Contratar / Configurar agentes subordinados        │
+└─────────────────────────────────────────────────────┘
 ```
 
-Mock: 4 CEO tasks (roadmap items), 3 PM submissions with varying ages for bottleneck demo.
+## Cambios en `CEOWorkspaceView.tsx`
 
----
+### Nucleo 1 — Estado del Agente CEO (ya existe, se mantiene)
+- Command bar actual con salud, Ver Libro Vivo, Consola, Configuracion
+- Autonomy slider y config colapsable se quedan aqui
+- Sin cambios significativos, solo agrupacion visual con titulo "Estado del Agente"
 
-## Cambios
+### Nucleo 2 — Tareas Pendientes (ya existe como "Roadmap del CEO")
+- Se mantiene igual: lista de tareas con iconos, "Ejecutar Tarea" y "Delegar al PM"
+- Se le agrega un header mas prominente: "Tareas Pendientes" con badge de conteo
 
-### 1. Crear `src/data/ceoManagement.ts`
-- Types + mock data for CEO roadmap tasks and PM submissions
-- Agent log entries for the reasoning console
-- Autonomy level config
+### Nucleo 3 — Pendientes por Aprobar (ya existe como "Bandeja de Revision")
+- Se mantiene igual: submissions del PM con bottleneck glow, botones Aprobar/Rechazar
+- Sin cambios funcionales
 
-### 2. Rewrite Phase 2 section in `CEOWorkspaceView.tsx`
+### Nucleo 4 — Core de Contrataciones (NUEVO)
+- Grid de tarjetas de agentes disponibles para "contratar":
+  - **Agente PM**: estado activo si ya fue inicializado, con boton "Ir al PM" o "Inicializar"
+  - **Agente de Marketing**: bloqueado (coming soon), icono lock
+  - **Agente de Ventas**: bloqueado (coming soon)
+- Cada tarjeta muestra: icono del agente, nombre, estado (Activo/Bloqueado), skills asignadas
+- El boton "Inicializar Agente PM" se mueve aqui desde donde esta actualmente suelto
+- Los selectores de skills del PM tambien se mueven a este nucleo (dentro de la tarjeta del PM)
 
-**Replace** the current PM Initialization workspace (lines 279-347) with:
+### Reorganizacion del layout
+- Nucleo 1: full-width bar (como esta)
+- Nucleos 2 y 3: grid 2 columnas (como esta)
+- Nucleo 4: full-width section debajo, con grid de 3 tarjetas de agentes
 
-**A) Two-column layout** below the command bar:
-
-- **Columna 1 — "Roadmap del CEO"**: Glass card with task list. Each item has:
-  - Icon per type (`BarChart3` for analysis, `GitBranch` for structure, `Target` for strategy, `Forward` for delegation)
-  - Task title + short description
-  - Two buttons: "Ejecutar Tarea" (ceo accent) and "Delegar al PM" (muted)
-
-- **Columna 2 — "Bandeja de Revisión (N)"**: Glass card with badge count in header. Each submission card shows:
-  - PM avatar tag (small purple badge "Agente PM")
-  - Task name + time ago ("hace 2h")
-  - Two buttons: "Revisar & Aprobar" (green/pm accent) and "Rechazar" (destructive subtle)
-  - **Bottleneck glow**: If `submittedAt` > 4 hours ago, the card gets a pulsing `ring-2 ring-amber-500/40 animate-pulse` border
-
-**B) Pull Request Review Modal** — New component inline or separate:
-- Opens when clicking "Revisar & Aprobar"
-- Split view (two columns inside a Dialog):
-  - Left: "Contexto & Framework" — shows `submission.reasoning` with framework name badge
-  - Right: "Resultado del PM" — shows `submission.resultPreview` as formatted content
-  - Bottom: "Aprobar" (green) + "Pedir Cambios" (amber) + textarea for feedback
-
-**C) Reasoning Console** — Collapsible bottom panel:
-- Similar to existing `ExecutionConsole` but for real-time agent logs
-- Toggle button in command bar: `<Terminal />` "Ver Consola"
-- Shows mock log entries: `[CEO] > Evaluando submissions pendientes...`, `[PM] > Tarea enviada a revisión`
-- Monospace font, dark glass background, max-h with scroll
-
-**D) Autonomy Slider** — Small section in the command bar or below it:
-- Per-agent slider (currently just PM): 3 levels
-  - Nivel 1: "Aprobación total" — all submissions require review
-  - Nivel 2: "Solo entregables" — auto-approve intermediate tasks
-  - Nivel 3: "Autonomía total" — notify only on completion
-- Reuses existing `Slider` component
-- Persisted in local state (visual only for now)
-
-### 3. Add imports
-
-New Lucide icons: `BarChart3`, `GitBranch`, `Target`, `Forward`, `Clock`, `User`, `XCircle`, `MessageCircle`
-
----
+### Mock data para agentes
+- Agregar a `ceoManagement.ts` un array `AVAILABLE_AGENTS` con 3 entries (PM, Marketing, Ventas) con campos: id, name, icon, status, skills, color
 
 ## Archivos
 
-| Archivo | Acción |
+| Archivo | Accion |
 |---------|--------|
-| `src/data/ceoManagement.ts` | Crear — tipos y mock data |
-| `src/components/njm/CEOWorkspaceView.tsx` | Modificar — rewrite Phase 2 con las 4 features |
+| `src/data/ceoManagement.ts` | Agregar tipos y mock de agentes disponibles |
+| `src/components/njm/CEOWorkspaceView.tsx` | Reorganizar Phase 2 en 4 nucleos |
 
-Total: 1 archivo nuevo, 1 modificado. Sin dependencias nuevas.
+Total: 2 archivos modificados. Sin dependencias nuevas.
 
