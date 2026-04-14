@@ -1,6 +1,14 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare, Play, BookOpen, Eye, Filter } from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare, Play, BookOpen, Eye, Filter, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+const CATEGORY_DEFINITIONS: Record<string, string> = {
+  Core: "Vectores fundamentales que definen la esencia de la marca: propósito, propuesta de valor y diferenciación.",
+  Business: "Vectores comerciales: audiencia objetivo, posicionamiento competitivo y modelo de negocio.",
+  Brand: "Vectores de identidad: identidad visual, tono de voz y personalidad de marca.",
+  Growth: "Vectores de crecimiento: canales de adquisición, KPIs estratégicos y estrategia de escalamiento.",
+};
 import { getBrand } from "@/data/brands";
 import { useBrandContext } from "@/context/BrandContext";
 import { toast } from "sonner";
@@ -124,15 +132,26 @@ export function CEOWorkspaceView() {
         <div className="mb-5 flex flex-wrap items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground mr-1" />
           {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategoryFilter(cat)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ${
-                categoryFilter === cat ? "glass text-ceo-fg shadow-md" : "glass-subtle text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {cat}
-            </button>
+            <div key={cat} className="flex items-center gap-1">
+              <button
+                onClick={() => setCategoryFilter(cat)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ${
+                  categoryFilter === cat ? "glass text-ceo-fg shadow-md" : "glass-subtle text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {cat}
+              </button>
+              {cat !== "Todos" && CATEGORY_DEFINITIONS[cat] && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="glass-strong border-none max-w-[220px]">
+                    <p className="text-xs">{CATEGORY_DEFINITIONS[cat]}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
           ))}
           <div className="ml-auto flex gap-1.5">
             {(["all", "validated", "pending"] as const).map((s) => (
