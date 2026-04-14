@@ -243,260 +243,212 @@ export function CEOWorkspaceView() {
 
       <main className="flex-1 p-8 pb-24">
 
-        {/* ═══════ PHASE 2: Management Mode ═══════ */}
+        {/* ═══════ PHASE 2: Management Mode — 4 Núcleos ═══════ */}
         {allValidated && (
-          <div className="mb-6 animate-fade-in space-y-4">
-            {/* Command bar */}
-            <div className="flex items-center justify-between rounded-2xl px-6 py-4 glass-strong">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pm/20">
-                  <CheckCircle2 className="h-5 w-5 text-pm-fg" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Agente CEO: Modo Gestión (100%)</p>
-                  <p className="text-xs text-muted-foreground">Todos los vectores validados · ADN completo</p>
-                </div>
+          <div className="mb-6 animate-fade-in space-y-6">
+
+            {/* ── NÚCLEO 1: Estado del Agente CEO ── */}
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldCheck className="h-4 w-4 text-ceo-fg" />
+                <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Núcleo 1 — Estado del Agente</h2>
               </div>
-              <div className="flex items-center gap-2">
-                {isLibroVivoComplete(id || "") && (
-                  <button
-                    onClick={() => navigate(`/brand/${id}/libro-vivo`)}
-                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-foreground glass-subtle hover:shadow-md transition-all"
-                  >
-                    <Eye className="h-3.5 w-3.5" /> Ver Libro Vivo
+
+              <div className="flex items-center justify-between rounded-2xl px-6 py-4 glass-strong">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pm/20">
+                    <CheckCircle2 className="h-5 w-5 text-pm-fg" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Agente CEO: Modo Gestión (100%)</p>
+                    <p className="text-xs text-muted-foreground">Todos los vectores validados · ADN completo</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isLibroVivoComplete(id || "") && (
+                    <button onClick={() => navigate(`/brand/${id}/libro-vivo`)} className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-foreground glass-subtle hover:shadow-md transition-all">
+                      <Eye className="h-3.5 w-3.5" /> Ver Libro Vivo
+                    </button>
+                  )}
+                  <button onClick={() => setShowConsole((p) => !p)} className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all glass-subtle hover:shadow-md ${showConsole ? "text-ceo-fg" : "text-muted-foreground hover:text-foreground"}`}>
+                    <Terminal className="h-3.5 w-3.5" /> Consola
                   </button>
-                )}
-                <button
-                  onClick={() => setShowConsole((p) => !p)}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all glass-subtle hover:shadow-md ${showConsole ? "text-ceo-fg" : "text-muted-foreground hover:text-foreground"}`}
-                >
-                  <Terminal className="h-3.5 w-3.5" /> Consola
-                </button>
-                <button
-                  onClick={() => setShowConfig((p) => !p)}
-                  className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground glass-subtle hover:text-foreground hover:shadow-md transition-all"
-                >
-                  <Settings2 className="h-3.5 w-3.5" />
-                  Configuración
-                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${showConfig ? "rotate-180" : ""}`} />
-                </button>
-              </div>
-            </div>
-
-            {/* Collapsible config */}
-            <div className={`transition-all duration-500 overflow-hidden ${showConfig ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="rounded-2xl p-5 glass flex flex-col items-center">
-                  <HealthRing pct={100} size={80} />
-                  <p className="mt-2 text-xs text-pm-fg font-medium">Sistema operativo</p>
-                </div>
-                <div className="rounded-2xl p-5 glass col-span-2">
-                  <PendingChecklist vectors={vectors} />
+                  <button onClick={() => setShowConfig((p) => !p)} className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground glass-subtle hover:text-foreground hover:shadow-md transition-all">
+                    <Settings2 className="h-3.5 w-3.5" /> Configuración
+                    <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${showConfig ? "rotate-180" : ""}`} />
+                  </button>
                 </div>
               </div>
-            </div>
 
-            {/* Autonomy Slider */}
-            <div className="rounded-2xl px-6 py-4 glass flex items-center gap-6">
-              <div className="flex items-center gap-2 shrink-0">
-                <Sparkles className="h-4 w-4 text-pm-fg" />
-                <span className="text-xs font-medium text-foreground">Autonomía del PM</span>
+              <div className={`transition-all duration-500 overflow-hidden ${showConfig ? "max-h-[400px] opacity-100 mt-4" : "max-h-0 opacity-0"}`}>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="rounded-2xl p-5 glass flex flex-col items-center">
+                    <HealthRing pct={100} size={80} />
+                    <p className="mt-2 text-xs text-pm-fg font-medium">Sistema operativo</p>
+                  </div>
+                  <div className="rounded-2xl p-5 glass col-span-2">
+                    <PendingChecklist vectors={vectors} />
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 max-w-xs">
-                <Slider
-                  value={[pmAutonomy]}
-                  onValueChange={([v]) => setPmAutonomy(v as AutonomyLevel)}
-                  min={0} max={2} step={1}
-                />
-              </div>
-              <div className="text-xs text-muted-foreground shrink-0">
-                <span className="text-foreground font-medium">{AUTONOMY_LEVEL_LABELS[pmAutonomy].label}</span>
-                {" — "}{AUTONOMY_LEVEL_LABELS[pmAutonomy].description}
-              </div>
-            </div>
 
-            {/* Two-column dashboard */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="rounded-2xl px-6 py-4 glass flex items-center gap-6 mt-4">
+                <div className="flex items-center gap-2 shrink-0">
+                  <Sparkles className="h-4 w-4 text-pm-fg" />
+                  <span className="text-xs font-medium text-foreground">Autonomía del PM</span>
+                </div>
+                <div className="flex-1 max-w-xs">
+                  <Slider value={[pmAutonomy]} onValueChange={([v]) => setPmAutonomy(v as AutonomyLevel)} min={0} max={2} step={1} />
+                </div>
+                <div className="text-xs text-muted-foreground shrink-0">
+                  <span className="text-foreground font-medium">{AUTONOMY_LEVEL_LABELS[pmAutonomy].label}</span>{" — "}{AUTONOMY_LEVEL_LABELS[pmAutonomy].description}
+                </div>
+              </div>
 
-              {/* Column 1: Roadmap del CEO */}
-              <div className="rounded-2xl p-5 glass-strong">
-                <div className="flex items-center gap-2 mb-4">
+              <div className={`transition-all duration-500 overflow-hidden ${showConsole ? "max-h-[300px] opacity-100 mt-4" : "max-h-0 opacity-0"}`}>
+                <div className="rounded-2xl border overflow-hidden" style={{ background: "hsla(220, 20%, 8%, 0.92)", borderColor: "hsla(0, 0%, 100%, 0.08)" }}>
+                  <div className="flex items-center gap-2 px-5 py-3 border-b" style={{ borderColor: "hsla(0, 0%, 100%, 0.06)" }}>
+                    <div className="flex gap-1">
+                      <span className="h-2.5 w-2.5 rounded-full bg-destructive/80" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-pm/80" />
+                    </div>
+                    <span className="ml-2 text-[11px] font-mono text-white/40 uppercase tracking-widest">Razonamiento de Agentes — Log</span>
+                  </div>
+                  <div className="px-5 py-4 space-y-2 max-h-[200px] overflow-auto scrollbar-thin font-mono text-[13px]">
+                    {AGENT_LOG_ENTRIES.map((entry, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <span className="text-white/20 text-[10px] shrink-0 mt-0.5">{entry.timestamp.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}</span>
+                        <span className={`shrink-0 text-[11px] font-bold ${entry.agent === "CEO" ? "text-ceo-fg" : "text-pm-fg"}`}>[{entry.agent}]</span>
+                        <span className="text-white/70">{entry.message}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* ── NÚCLEOS 2 & 3: Tareas + Aprobaciones ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* NÚCLEO 2: Tareas Pendientes */}
+              <section>
+                <div className="flex items-center gap-2 mb-3">
                   <Target className="h-4 w-4 text-ceo-fg" />
-                  <h2 className="text-sm font-semibold text-foreground">Roadmap del CEO</h2>
-                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium glass-subtle text-muted-foreground">
-                    {ceoTasks.length} tareas
-                  </span>
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Núcleo 2 — Tareas Pendientes</h2>
+                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium glass-subtle text-muted-foreground">{ceoTasks.length}</span>
                 </div>
-                <div className="space-y-3">
+                <div className="rounded-2xl p-5 glass-strong space-y-3">
                   {ceoTasks.map((task) => {
-                    const IconMap: Record<string, typeof BarChart3> = {
-                      analysis: BarChart3, structure: GitBranch, strategy: Target, delegation: Forward,
-                    };
+                    const IconMap: Record<string, typeof BarChart3> = { analysis: BarChart3, structure: GitBranch, strategy: Target, delegation: Forward };
                     const TaskIcon = IconMap[task.type] || Target;
                     return (
                       <div key={task.id} className="rounded-xl p-4 glass group hover:shadow-lg transition-all duration-200">
                         <div className="flex items-start gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ceo/10 shrink-0">
-                            <TaskIcon className="h-4 w-4 text-ceo-fg" />
-                          </div>
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ceo/10 shrink-0"><TaskIcon className="h-4 w-4 text-ceo-fg" /></div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <h3 className="text-sm font-medium text-foreground truncate">{task.title}</h3>
-                              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
-                                task.priority === "high" ? "bg-destructive/20 text-destructive" :
-                                task.priority === "medium" ? "bg-amber-500/20 text-amber-400" :
-                                "bg-muted text-muted-foreground"
-                              }`}>
-                                {task.priority}
-                              </span>
+                              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${task.priority === "high" ? "bg-destructive/20 text-destructive" : task.priority === "medium" ? "bg-amber-500/20 text-amber-400" : "bg-muted text-muted-foreground"}`}>{task.priority}</span>
                             </div>
                             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{task.description}</p>
                           </div>
                         </div>
                         <div className="mt-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <button
-                            onClick={() => toast.info(`Ejecutando: ${task.title}`)}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-ceo-fg glass-subtle hover:shadow-md transition-all"
-                          >
-                            <Play className="h-3 w-3" /> Ejecutar Tarea
-                          </button>
-                          <button
-                            onClick={() => toast.info(`Delegando al PM: ${task.title}`)}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-muted-foreground glass-subtle hover:text-foreground hover:shadow-md transition-all"
-                          >
-                            <Forward className="h-3 w-3" /> Delegar al PM
-                          </button>
+                          <button onClick={() => toast.info(`Ejecutando: ${task.title}`)} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-ceo-fg glass-subtle hover:shadow-md transition-all"><Play className="h-3 w-3" /> Ejecutar Tarea</button>
+                          <button onClick={() => toast.info(`Delegando al PM: ${task.title}`)} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-muted-foreground glass-subtle hover:text-foreground hover:shadow-md transition-all"><Forward className="h-3 w-3" /> Delegar al PM</button>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              </div>
+              </section>
 
-              {/* Column 2: Bandeja de Revisión */}
-              <div className="rounded-2xl p-5 glass-strong">
-                <div className="flex items-center gap-2 mb-4">
+              {/* NÚCLEO 3: Pendientes por Aprobar */}
+              <section>
+                <div className="flex items-center gap-2 mb-3">
                   <MessageCircle className="h-4 w-4 text-pm-fg" />
-                  <h2 className="text-sm font-semibold text-foreground">Bandeja de Revisión</h2>
-                  <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold bg-pm/20 text-pm-fg">
-                    {submissions.filter((s) => s.status === "pending").length}
-                  </span>
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Núcleo 3 — Pendientes por Aprobar</h2>
+                  <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold bg-pm/20 text-pm-fg">{submissions.filter((s) => s.status === "pending").length}</span>
                 </div>
-                <div className="space-y-3">
+                <div className="rounded-2xl p-5 glass-strong space-y-3">
                   {submissions.filter((s) => s.status === "pending").map((sub) => {
                     const bottleneck = isBottleneck(sub.submittedAt);
                     return (
-                      <div
-                        key={sub.id}
-                        className={`rounded-xl p-4 glass transition-all duration-300 ${
-                          bottleneck ? "ring-2 ring-amber-500/40 animate-pulse" : ""
-                        }`}
-                      >
+                      <div key={sub.id} className={`rounded-xl p-4 glass transition-all duration-300 ${bottleneck ? "ring-2 ring-amber-500/40 animate-pulse" : ""}`}>
                         <div className="flex items-start gap-3">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-pm/20 shrink-0">
-                            <User className="h-3.5 w-3.5 text-pm-fg" />
-                          </div>
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-pm/20 shrink-0"><User className="h-3.5 w-3.5 text-pm-fg" /></div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="rounded-full px-2 py-0.5 text-[9px] font-medium bg-pm/20 text-pm-fg">
-                                Agente PM
-                              </span>
-                              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                                <Clock className="h-2.5 w-2.5" /> {getTimeAgo(sub.submittedAt)}
-                              </span>
-                              {bottleneck && (
-                                <span className="text-[9px] text-amber-400 font-medium">⚠ Cuello de botella</span>
-                              )}
+                              <span className="rounded-full px-2 py-0.5 text-[9px] font-medium bg-pm/20 text-pm-fg">Agente PM</span>
+                              <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="h-2.5 w-2.5" /> {getTimeAgo(sub.submittedAt)}</span>
+                              {bottleneck && <span className="text-[9px] text-amber-400 font-medium">⚠ Cuello de botella</span>}
                             </div>
                             <h3 className="text-sm font-medium text-foreground">{sub.taskName}</h3>
                             <p className="text-[10px] text-muted-foreground mt-0.5">Framework: {sub.framework}</p>
                           </div>
                         </div>
                         <div className="mt-3 flex gap-2">
-                          <button
-                            onClick={() => { setReviewSubmission(sub); setReviewFeedback(""); }}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all hover:shadow-md"
-                            style={{ background: "hsla(160, 84%, 39%, 0.15)", color: "hsl(160, 84%, 50%)" }}
-                          >
-                            <CheckCircle2 className="h-3 w-3" /> Revisar & Aprobar
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSubmissions((prev) => prev.map((s) => s.id === sub.id ? { ...s, status: "rejected" as const } : s));
-                              toast.error(`Rechazado: ${sub.taskName}`);
-                            }}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-destructive/80 glass-subtle hover:text-destructive hover:shadow-md transition-all"
-                          >
-                            <XCircle className="h-3 w-3" /> Rechazar
-                          </button>
+                          <button onClick={() => { setReviewSubmission(sub); setReviewFeedback(""); }} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all hover:shadow-md bg-pm/15 text-pm-fg"><CheckCircle2 className="h-3 w-3" /> Revisar & Aprobar</button>
+                          <button onClick={() => { setSubmissions((prev) => prev.map((s) => s.id === sub.id ? { ...s, status: "rejected" as const } : s)); toast.error(`Rechazado: ${sub.taskName}`); }} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-destructive/80 glass-subtle hover:text-destructive hover:shadow-md transition-all"><XCircle className="h-3 w-3" /> Rechazar</button>
                         </div>
                       </div>
                     );
                   })}
                   {submissions.filter((s) => s.status === "pending").length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground text-xs">
-                      Sin submissions pendientes
-                    </div>
+                    <div className="text-center py-8 text-muted-foreground text-xs">Sin submissions pendientes</div>
                   )}
                 </div>
-              </div>
+              </section>
             </div>
 
-            {/* Reasoning Console */}
-            <div className={`transition-all duration-500 overflow-hidden ${showConsole ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
-              <div
-                className="rounded-2xl border overflow-hidden"
-                style={{ background: "hsla(220, 20%, 8%, 0.92)", borderColor: "hsla(0, 0%, 100%, 0.08)" }}
-              >
-                <div className="flex items-center gap-2 px-5 py-3 border-b" style={{ borderColor: "hsla(0, 0%, 100%, 0.06)" }}>
-                  <div className="flex gap-1">
-                    <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
-                  </div>
-                  <span className="ml-2 text-[11px] font-mono text-white/40 uppercase tracking-widest">
-                    Razonamiento de Agentes — Log
-                  </span>
-                </div>
-                <div className="px-5 py-4 space-y-2 max-h-[200px] overflow-auto scrollbar-thin font-mono text-[13px]">
-                  {AGENT_LOG_ENTRIES.map((entry, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <span className="text-white/20 text-[10px] shrink-0 mt-0.5">
-                        {entry.timestamp.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
-                      </span>
-                      <span className={`shrink-0 text-[11px] font-bold ${
-                        entry.agent === "CEO" ? "text-ceo-fg" : "text-pm-fg"
-                      }`}>
-                        [{entry.agent}]
-                      </span>
-                      <span className="text-white/70">{entry.message}</span>
+            {/* ── NÚCLEO 4: Core de Contrataciones ── */}
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <Handshake className="h-4 w-4 text-ceo-fg" />
+                <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Núcleo 4 — Core de Contrataciones</h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {AVAILABLE_AGENTS.map((agent) => {
+                  const isActive = agent.status === "active";
+                  const isLocked = agent.status === "locked";
+                  const AgentIconMap: Record<string, typeof ClipboardList> = { "clipboard-list": ClipboardList, megaphone: Megaphone, handshake: Handshake };
+                  const AgentIcon = AgentIconMap[agent.icon] || ClipboardList;
+                  return (
+                    <div key={agent.id} className={`rounded-2xl p-5 glass transition-all duration-300 ${isLocked ? "opacity-50" : "hover:shadow-lg hover:-translate-y-1"} ${isActive ? "border border-pm/30" : ""}`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${isActive ? "bg-pm/20" : "bg-muted/30"}`}>
+                          {isLocked ? <Lock className="h-5 w-5 text-muted-foreground/50" /> : <AgentIcon className="h-5 w-5 text-pm-fg" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold text-foreground">{agent.name}</h3>
+                          <p className="text-[10px] text-muted-foreground">{agent.role}</p>
+                        </div>
+                        <span className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${isActive ? "bg-pm/20 text-pm-fg" : "bg-muted text-muted-foreground"}`}>
+                          {isActive ? "Activo" : isLocked ? "Próximamente" : "Disponible"}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {agent.skills.map((skill) => (
+                          <span key={skill} className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${isActive && agent.id === "pm" ? (pmSkills.includes(skill) ? "bg-pm/20 text-pm-fg" : "glass-subtle text-muted-foreground cursor-pointer hover:text-foreground") : "glass-subtle text-muted-foreground"}`} onClick={() => { if (isActive && agent.id === "pm") toggleSkill(skill); }}>{skill}</span>
+                        ))}
+                      </div>
+                      {isActive && agent.id === "pm" && (
+                        <button onClick={handleInitPM} disabled={pmSkills.length === 0} className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-medium text-white transition-all duration-300 hover:shadow-xl hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed bg-pm/80 hover:bg-pm">
+                          <Sparkles className="h-3.5 w-3.5" />
+                          {isLibroVivoComplete(id || "") ? "Ir al Workspace PM" : "Inicializar Agente PM"}
+                        </button>
+                      )}
+                      {isLocked && (
+                        <div className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-medium text-muted-foreground/50 glass-subtle cursor-not-allowed">
+                          <Lock className="h-3.5 w-3.5" /> Coming Soon
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            </div>
+            </section>
 
-            {/* PM Init button (if not started) */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleInitPM}
-                disabled={pmSkills.length === 0}
-                className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:shadow-xl hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: "hsla(160, 84%, 39%, 0.85)", backdropFilter: "blur(20px)" }}
-              >
-                <Sparkles className="h-4 w-4" />
-                Inicializar Agente PM
-              </button>
-              {!isLibroVivoComplete(id || "") && (
-                <button
-                  onClick={handleSignLibroVivo}
-                  className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-foreground glass-subtle hover:shadow-lg transition-all"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Firmar Libro Vivo
-                </button>
-              )}
-            </div>
           </div>
         )}
 
