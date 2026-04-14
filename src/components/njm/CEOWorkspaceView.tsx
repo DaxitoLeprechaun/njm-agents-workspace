@@ -5,8 +5,9 @@ import { EmptyState } from "@/components/njm/EmptyState";
 import {
   Inbox, ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare,
   Play, BookOpen, Eye, Filter, Info, ChevronDown, Settings2, Zap,
-  Terminal, Sparkles, CircleDot, Layers,
+  Terminal, Sparkles, CircleDot, Layers, Lock,
   BarChart3, GitBranch, Target, Forward, Clock, XCircle, MessageCircle, User,
+  ClipboardList, Megaphone, Handshake,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Slider } from "@/components/ui/slider";
