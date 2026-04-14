@@ -103,10 +103,15 @@ export function CEOWorkspaceView() {
   const pendingVectors = vectors.filter((v) => !v.validated);
   const urgentVector = pendingVectors[0] || null;
 
-  // Phase 2 state
+  // Phase 2 / Management Mode state
   const [showConfig, setShowConfig] = useState(false);
   const [pmSkills, setPmSkills] = useState<string[]>(["Análisis Competitivo", "Research"]);
-  const [pmAutonomy, setPmAutonomy] = useState(1); // 0=Supervisado, 1=Semi, 2=Autónomo
+  const [pmAutonomy, setPmAutonomy] = useState<AutonomyLevel>(1);
+  const [showConsole, setShowConsole] = useState(false);
+  const [reviewSubmission, setReviewSubmission] = useState<PMSubmission | null>(null);
+  const [reviewFeedback, setReviewFeedback] = useState("");
+  const [submissions, setSubmissions] = useState(PM_SUBMISSIONS);
+  const [ceoTasks, setCeoTasks] = useState(CEO_ROADMAP_TASKS);
 
   // Filter state
   const [categoryFilter, setCategoryFilter] = useState("Todos");
