@@ -1,20 +1,6 @@
 import { Plus, TrendingUp } from "lucide-react";
-
-interface Brand {
-  id: string;
-  name: string;
-  sector: string;
-  status: "Activo" | "En Setup" | "Pausado";
-  health: number;
-}
-
-const brands: Brand[] = [
-  { id: "1", name: "Disrupt", sector: "SaaS B2B", status: "Activo", health: 80 },
-  { id: "2", name: "NovaTech", sector: "FinTech", status: "Activo", health: 65 },
-  { id: "3", name: "Meridian", sector: "HealthTech", status: "En Setup", health: 30 },
-  { id: "4", name: "Apex Growth", sector: "E-Commerce", status: "Activo", health: 92 },
-  { id: "5", name: "Lumina AI", sector: "AI/ML", status: "Pausado", health: 45 },
-];
+import { useNavigate } from "react-router-dom";
+import { brands } from "@/data/brands";
 
 const statusColors: Record<string, string> = {
   Activo: "bg-pm/20 text-pm-fg",
@@ -22,11 +8,9 @@ const statusColors: Record<string, string> = {
   Pausado: "bg-muted text-muted-foreground",
 };
 
-interface AgencyHubViewProps {
-  onBrandSelect: (brandId: string) => void;
-}
+export function AgencyHubView() {
+  const navigate = useNavigate();
 
-export function AgencyHubView({ onBrandSelect }: AgencyHubViewProps) {
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin">
       <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
@@ -41,7 +25,7 @@ export function AgencyHubView({ onBrandSelect }: AgencyHubViewProps) {
           {brands.map((brand) => (
             <button
               key={brand.id}
-              onClick={() => onBrandSelect(brand.id)}
+              onClick={() => navigate(`/brand/${brand.id}/ceo`)}
               className="group relative rounded-2xl p-5 text-left transition-all duration-300 glass hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]"
             >
               <div className="flex items-start justify-between">

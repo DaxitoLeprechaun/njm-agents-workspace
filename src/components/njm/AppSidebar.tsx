@@ -1,20 +1,14 @@
 import { Building, ShieldCheck, Briefcase, Settings, Hexagon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-type View = "agency" | "ceo" | "pm";
-
-interface AppSidebarProps {
-  activeView: View;
-  onViewChange: (view: View) => void;
-}
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 const navItems = [
-  { id: "agency" as View, icon: Building, label: "Agency Hub", color: "agency" },
+  { path: "/", icon: Building, label: "Agency Hub", color: "agency" },
 ] as const;
 
 const agentItems = [
-  { id: "ceo" as View, icon: ShieldCheck, label: "Agente CEO (Guardián)", color: "ceo" },
-  { id: "pm" as View, icon: Briefcase, label: "Agente PM (Operativo)", color: "pm" },
+  { pathSuffix: "ceo", icon: ShieldCheck, label: "Agente CEO (Guardián)", color: "ceo" },
+  { pathSuffix: "pm", icon: Briefcase, label: "Agente PM (Operativo)", color: "pm" },
 ] as const;
 
 const colorMap: Record<string, string> = {
@@ -23,7 +17,24 @@ const colorMap: Record<string, string> = {
   pm: "border-pm text-pm",
 };
 
-export function AppSidebar({ activeView, onViewChange }: AppSidebarProps) {
+export function AppSidebar() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const location = useLocation();
+
+  const currentPath = location.pathname;
+
+  const getActiveColor = () => {
+    if (currentPath.includes("/ceo")) return "ceo";
+    if (currentPath.includes("/pm")) return "pm";
+    return "agency";
+  };
+
+  const isActive = (check: string) => {
+    if (check === "/") return currentPath === "/";
+    return currentPath.includes(`/${check}`);
+  };
+
   return (
     <aside className="flex h-screen w-16 flex-col items-center py-4 glass-subtle rounded-r-2xl">
       {/* Logo */}
@@ -35,27 +46,34 @@ export function AppSidebar({ activeView, onViewChange }: AppSidebarProps) {
       <nav className="flex flex-1 flex-col items-center gap-1">
         {navItems.map((item) => (
           <SidebarButton
-            key={item.id}
+            key={item.path}
             icon={item.icon}
             label={item.label}
-            active={activeView === item.id}
+            active={isActive(item.path)}
             colorClass={colorMap[item.color]}
-            onClick={() => onViewChange(item.id)}
+            onClick={() => navigate(item.path)}
           />
         ))}
 
         <div className="my-3 h-px w-8 bg-border/50" />
 
-        {agentItems.map((item) => (
-          <SidebarButton
-            key={item.id}
-            icon={item.icon}
-            label={item.label}
-            active={activeView === item.id}
-            colorClass={colorMap[item.color]}
-            onClick={() => onViewChange(item.id)}
-          />
-        ))}
+        {agentItems.map((item) => {
+          const disabled = !id;
+          const active = isActive(item.pathSuffix);
+          return (
+            <SidebarButton
+              key={item.pathSuffix}
+              icon={item.icon}
+              label={disabled ? `${item.label} (selecciona marca)` : item.label}
+              active={active}
+              colorClass={colorMap[item.color]}
+              disabled={disabled}
+              onClick={() => {
+                if (!disabled) navigate(`/brand/${id}/${item.pathSuffix}`);
+              }}
+            />
+          );
+        })}
       </nav>
 
       {/* Bottom */}
@@ -76,12 +94,14 @@ function SidebarButton({
   label,
   active,
   colorClass,
+  disabled,
   onClick,
 }: {
   icon: React.ElementType;
   label: string;
   active: boolean;
   colorClass: string;
+  disabled?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -89,15 +109,18 @@ function SidebarButton({
       <TooltipTrigger asChild>
         <button
           onClick={onClick}
+          disabled={disabled}
           className={`relative rounded-xl p-2.5 transition-all duration-300 ${
-            active
-              ? `${colorClass} glass shadow-lg`
-              : "text-muted-foreground hover:text-foreground glass-subtle hover:shadow-md"
+            disabled
+              ? "text-muted-foreground/30 cursor-not-allowed"
+              : active
+                ? `${colorClass} glass shadow-lg`
+                : "text-muted-foreground hover:text-foreground glass-subtle hover:shadow-md"
           }`}
         >
-          {active && (
+          {active && !disabled && (
             <span
-              className={`absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-r ${colorMap[active ? colorClass.split(" ")[0].replace("border-", "") : ""]?.split(" ")[0] ?? colorClass.split(" ")[0]} bg-current`}
+              className="absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-r bg-current"
               style={{ left: "-8px" }}
             />
           )}
