@@ -4,6 +4,7 @@ import { AgencyHubView } from "@/components/njm/AgencyHubView";
 import { CEOWorkspaceView } from "@/components/njm/CEOWorkspaceView";
 import { PMWorkspaceView } from "@/components/njm/PMWorkspaceView";
 import { DocumentDrawer } from "@/components/njm/DocumentDrawer";
+import natureBg from "@/assets/nature-bg.jpg";
 
 type View = "agency" | "ceo" | "pm";
 
@@ -22,16 +23,30 @@ const Index = () => {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-surface-0">
-      <AppSidebar activeView={activeView} onViewChange={setActiveView} />
+    <div className="relative flex h-screen w-full overflow-hidden">
+      {/* Nature background */}
+      <img
+        src={natureBg}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        width={1920}
+        height={1080}
+      />
+      {/* Soft overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-sky-100/30" />
 
-      <div className="flex flex-1 overflow-hidden">
-        {activeView === "agency" && <AgencyHubView onBrandSelect={handleBrandSelect} />}
-        {activeView === "ceo" && <CEOWorkspaceView />}
-        {activeView === "pm" && <PMWorkspaceView onOpenDocument={handleOpenDocument} />}
+      {/* App shell */}
+      <div className="relative z-10 flex h-full w-full">
+        <AppSidebar activeView={activeView} onViewChange={setActiveView} />
+
+        <div className="flex flex-1 overflow-hidden">
+          {activeView === "agency" && <AgencyHubView onBrandSelect={handleBrandSelect} />}
+          {activeView === "ceo" && <CEOWorkspaceView />}
+          {activeView === "pm" && <PMWorkspaceView onOpenDocument={handleOpenDocument} />}
+        </div>
+
+        <DocumentDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} document={activeDoc} />
       </div>
-
-      <DocumentDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} document={activeDoc} />
     </div>
   );
 };

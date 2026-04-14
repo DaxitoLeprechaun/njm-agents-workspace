@@ -18,7 +18,7 @@ const artifacts: Artifact[] = [
 
 const statusConfig: Record<string, { color: string; dot: string }> = {
   Completado: { color: "bg-pm/20 text-pm-fg", dot: "bg-pm" },
-  Pendiente: { color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
+  Pendiente: { color: "bg-muted/50 text-muted-foreground", dot: "bg-muted-foreground" },
   "En Progreso": { color: "bg-agency/20 text-agency-fg", dot: "bg-agency" },
 };
 
@@ -29,9 +29,9 @@ interface PMWorkspaceViewProps {
 export function PMWorkspaceView({ onOpenDocument }: PMWorkspaceViewProps) {
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin">
-      <header className="sticky top-0 z-10 border-b border-border bg-surface-0/80 px-8 py-5 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pm/10">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl glass bg-pm/10">
             <Briefcase className="h-5 w-5 text-pm-fg" />
           </div>
           <div>
@@ -51,15 +51,15 @@ export function PMWorkspaceView({ onOpenDocument }: PMWorkspaceViewProps) {
                 key={a.id}
                 disabled={!clickable}
                 onClick={() => clickable && onOpenDocument({ id: a.id, name: a.name, description: a.description })}
-                className={`group rounded-xl border border-border bg-card p-5 text-left transition-all duration-200 ${
+                className={`group rounded-2xl p-5 text-left transition-all duration-300 glass ${
                   clickable
-                    ? "cursor-pointer hover:border-pm/40 hover:shadow-lg hover:shadow-pm/5 hover:-translate-y-0.5"
-                    : "cursor-default opacity-80"
+                    ? "cursor-pointer hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]"
+                    : "cursor-default opacity-70"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <FileText className="h-5 w-5 text-muted-foreground" />
-                  <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-medium ${cfg.color}`}>
+                  <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-medium glass-subtle ${cfg.color}`}>
                     <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
                     {a.status}
                   </span>
@@ -74,7 +74,7 @@ export function PMWorkspaceView({ onOpenDocument }: PMWorkspaceViewProps) {
 
       {/* Floating action */}
       <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
-        <button className="flex items-center gap-2 rounded-full bg-pm px-6 py-3 font-medium text-foreground shadow-xl shadow-pm/20 transition-all duration-200 hover:shadow-2xl hover:shadow-pm/30 hover:scale-105">
+        <button className="flex items-center gap-2 rounded-full px-6 py-3 font-medium shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105" style={{ background: 'hsla(160, 84%, 39%, 0.85)', backdropFilter: 'blur(20px)', color: 'white' }}>
           <Zap className="h-4 w-4" />
           Consultar Estrategia / Ejecutar Tarea
         </button>
