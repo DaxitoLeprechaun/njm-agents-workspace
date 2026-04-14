@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { Plus, TrendingUp, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, TrendingUp, Search, Inbox } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { brands } from "@/data/brands";
+import { WorkspaceSkeleton } from "@/components/njm/WorkspaceSkeleton";
+import { EmptyState } from "@/components/njm/EmptyState";
 
 const statusColors: Record<string, string> = {
   Activo: "bg-pm/20 text-pm-fg",
@@ -15,12 +17,22 @@ export function AgencyHubView() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = brands.filter((b) => {
     const matchesSearch = !search || b.name.toLowerCase().includes(search.toLowerCase()) || b.sector.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "Todos" || b.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  if (isLoading) {
+    return <WorkspaceSkeleton cards={5} columns="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />;
+  }
 
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin animate-fade-in">
@@ -62,47 +74,66 @@ export function AgencyHubView() {
       </header>
 
       <main className="flex-1 p-8">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((brand, i) => (
-            <button
-              key={brand.id}
-              onClick={() => navigate(`/brand/${brand.id}`)}
-              className="group relative rounded-2xl p-5 text-left transition-all duration-300 glass hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]"
-              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-foreground">{brand.name}</h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{brand.sector}</p>
+        {filtered.length === 0 ? (
+          <EmptyState
+            icon={Inbox}
+            title={search || statusFilter !== "Todos" ? "Sin resultados" : "Sin marcas aún"}
+            description={
+              search || statusFilter !== "Todos"
+                ? "No se encontraron marcas con los filtros aplicados. Intenta otra búsqueda."
+                : "Agrega tu primera marca para comenzar a gestionar su estrategia con agentes de IA."
+            }
+            actionLabel={search || statusFilter !== "Todos" ? "Limpiar filtros" : "Agregar Marca"}
+            onAction={() => {
+              if (search || statusFilter !== "Todos") {
+                setSearch("");
+                setStatusFilter("Todos");
+              }
+            }}
+          />
+        ) : (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((brand, i) => (
+              <button
+                key={brand.id}
+                onClick={() => navigate(`/brand/${brand.id}`)}
+                className="group relative rounded-2xl p-5 text-left transition-all duration-300 glass hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]"
+                style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{brand.name}</h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{brand.sector}</p>
+                  </div>
+                  <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium glass-subtle ${statusColors[brand.status]}`}>
+                    {brand.status}
+                  </span>
                 </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium glass-subtle ${statusColors[brand.status]}`}>
-                  {brand.status}
-                </span>
-              </div>
 
-              <div className="mt-5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Salud del Libro Vivo</span>
-                  <span className="font-medium text-foreground">{brand.health}%</span>
+                <div className="mt-5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Salud del Libro Vivo</span>
+                    <span className="font-medium text-foreground">{brand.health}%</span>
+                  </div>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-3/50">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-agency to-pm transition-all duration-500"
+                      style={{ width: `${brand.health}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-3/50">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-agency to-pm transition-all duration-500"
-                    style={{ width: `${brand.health}%` }}
-                  />
-                </div>
-              </div>
 
-              <TrendingUp className="absolute bottom-4 right-4 h-4 w-4 text-muted-foreground/30 transition-colors group-hover:text-agency-fg/60" />
+                <TrendingUp className="absolute bottom-4 right-4 h-4 w-4 text-muted-foreground/30 transition-colors group-hover:text-agency-fg/60" />
+              </button>
+            ))}
+
+            {/* Add new brand */}
+            <button className="flex min-h-[140px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/40 bg-white/20 p-5 text-muted-foreground transition-all duration-300 hover:bg-white/40 hover:text-agency-fg hover:border-agency/40 hover:shadow-lg">
+              <Plus className="mb-2 h-6 w-6" />
+              <span className="text-sm font-medium">Agregar Marca</span>
             </button>
-          ))}
-
-          {/* Add new brand */}
-          <button className="flex min-h-[140px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/40 bg-white/20 p-5 text-muted-foreground transition-all duration-300 hover:bg-white/40 hover:text-agency-fg hover:border-agency/40 hover:shadow-lg">
-            <Plus className="mb-2 h-6 w-6" />
-            <span className="text-sm font-medium">Agregar Marca</span>
-          </button>
-        </div>
+          </div>
+        )}
       </main>
     </div>
   );
