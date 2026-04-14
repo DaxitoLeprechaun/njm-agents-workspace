@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { AppSidebar } from "@/components/njm/AppSidebar";
 import { BrandProvider } from "@/context/BrandContext";
+import { CommandPalette } from "@/components/njm/CommandPalette";
 import { useIsMobile } from "@/hooks/use-mobile";
 import natureBg from "@/assets/nature-bg.jpg";
 
@@ -28,6 +29,7 @@ export default function AppLayout() {
             <Outlet />
           </div>
         </div>
+        <CommandPalette />
       </div>
     </BrandProvider>
   );

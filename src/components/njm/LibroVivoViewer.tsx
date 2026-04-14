@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { BookOpen, CheckCircle2, ShieldCheck, ArrowLeft } from "lucide-react";
+import { BookOpen, CheckCircle2, ShieldCheck, ArrowLeft, Download } from "lucide-react";
+import { toast } from "sonner";
 import { getBrand, type StrategicVector } from "@/data/brands";
 import { useBrandContext } from "@/context/BrandContext";
 import {
@@ -107,9 +108,36 @@ export function LibroVivoViewer() {
               <p className="text-sm text-muted-foreground">Fuente de verdad estratégica</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-full px-3 py-1.5 glass-subtle">
-            <ShieldCheck className="h-4 w-4 text-ceo-fg" />
-            <span className="text-xs font-medium text-foreground">Firmado por CEO</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                const lines: string[] = [`# Libro Vivo — ${brand.name}\n`];
+                sortedCategories.forEach((cat) => {
+                  const info = categoryLabels[cat];
+                  lines.push(`## ${info?.title || cat}\n${info?.description || ""}\n`);
+                  grouped[cat].forEach((v) => {
+                    lines.push(`### ${v.name}\n${v.summary || "Validado."}\n`);
+                  });
+                });
+                lines.push(`## Matriz Cognitiva del PM\n`);
+                pmMatrix.forEach((r) => lines.push(`- **${r.param}**: ${r.value}`));
+                const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `Libro_Vivo_${brand.name.replace(/\s+/g, "_")}.md`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast.success("Libro Vivo exportado");
+              }}
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all glass-subtle hover:shadow-md text-muted-foreground hover:text-foreground"
+            >
+              <Download className="h-3.5 w-3.5" /> Exportar .md
+            </button>
+            <div className="flex items-center gap-2 rounded-full px-3 py-1.5 glass-subtle">
+              <ShieldCheck className="h-4 w-4 text-ceo-fg" />
+              <span className="text-xs font-medium text-foreground">Firmado por CEO</span>
+            </div>
           </div>
         </div>
       </header>

@@ -1,4 +1,4 @@
-import { CheckCircle2, Sparkles } from "lucide-react";
+import { CheckCircle2, Sparkles, Download } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -98,6 +98,21 @@ export function DocumentSheet({ open, onOpenChange, artifact }: DocumentSheetPro
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 border-t border-white/30 px-6 py-4">
+          <button
+            onClick={() => {
+              const blob = new Blob([`# ${artifact.name}\n\n${sampleMarkdown}`], { type: "text/markdown" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `${artifact.name.replace(/\s+/g, "_")}.md`;
+              a.click();
+              URL.revokeObjectURL(url);
+              toast.success("Documento descargado");
+            }}
+            className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 glass-subtle hover:shadow-md hover:text-foreground"
+          >
+            <Download className="h-3.5 w-3.5" /> Descargar .md
+          </button>
           <button className="rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 glass-subtle hover:shadow-md hover:text-foreground">
             Proponer Ajustes
           </button>
