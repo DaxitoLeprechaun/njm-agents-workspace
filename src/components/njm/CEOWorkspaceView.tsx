@@ -6,9 +6,17 @@ import {
   Inbox, ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare,
   Play, BookOpen, Eye, Filter, Info, ChevronDown, Settings2, Zap,
   Terminal, Sparkles, CircleDot, Layers,
+  BarChart3, GitBranch, Target, Forward, Clock, XCircle, MessageCircle, User,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Slider } from "@/components/ui/slider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  CEO_ROADMAP_TASKS, PM_SUBMISSIONS, AGENT_LOG_ENTRIES, AUTONOMY_LEVEL_LABELS,
+  getTimeAgo, isBottleneck,
+  type CEOTask, type PMSubmission, type AutonomyLevel,
+} from "@/data/ceoManagement";
 
 const CATEGORY_DEFINITIONS: Record<string, string> = {
   Core: "Vectores fundamentales que definen la esencia de la marca: propósito, propuesta de valor y diferenciación.",
@@ -18,7 +26,6 @@ const CATEGORY_DEFINITIONS: Record<string, string> = {
 };
 
 const PM_SKILLS = ["Análisis Competitivo", "Research", "Generación de Contenido", "Roadmapping"];
-const AUTONOMY_LABELS = ["Supervisado", "Semi-Autónomo", "Autónomo"];
 
 import { getBrand } from "@/data/brands";
 import { useBrandContext } from "@/context/BrandContext";
@@ -95,10 +102,15 @@ export function CEOWorkspaceView() {
   const pendingVectors = vectors.filter((v) => !v.validated);
   const urgentVector = pendingVectors[0] || null;
 
-  // Phase 2 state
+  // Phase 2 / Management Mode state
   const [showConfig, setShowConfig] = useState(false);
   const [pmSkills, setPmSkills] = useState<string[]>(["Análisis Competitivo", "Research"]);
-  const [pmAutonomy, setPmAutonomy] = useState(1); // 0=Supervisado, 1=Semi, 2=Autónomo
+  const [pmAutonomy, setPmAutonomy] = useState<AutonomyLevel>(1);
+  const [showConsole, setShowConsole] = useState(false);
+  const [reviewSubmission, setReviewSubmission] = useState<PMSubmission | null>(null);
+  const [reviewFeedback, setReviewFeedback] = useState("");
+  const [submissions, setSubmissions] = useState(PM_SUBMISSIONS);
+  const [ceoTasks, setCeoTasks] = useState(CEO_ROADMAP_TASKS);
 
   // Filter state
   const [categoryFilter, setCategoryFilter] = useState("Todos");
@@ -154,7 +166,7 @@ export function CEOWorkspaceView() {
       handleSignLibroVivo();
     }
     toast.success("✅ Agente PM inicializado", {
-      description: `Skills: ${pmSkills.join(", ")} · Autonomía: ${AUTONOMY_LABELS[pmAutonomy]}`,
+      description: `Skills: ${pmSkills.join(", ")} · Autonomía: ${AUTONOMY_LEVEL_LABELS[pmAutonomy].label}`,
     });
     setTimeout(() => navigate(`/brand/${id}/pm`), 800);
   };
@@ -229,17 +241,17 @@ export function CEOWorkspaceView() {
 
       <main className="flex-1 p-8 pb-24">
 
-        {/* ═══════ PHASE 2: Operational ═══════ */}
+        {/* ═══════ PHASE 2: Management Mode ═══════ */}
         {allValidated && (
-          <div className="mb-6 animate-fade-in">
+          <div className="mb-6 animate-fade-in space-y-4">
             {/* Command bar */}
-            <div className="flex items-center justify-between rounded-2xl px-6 py-4 glass-strong mb-4">
+            <div className="flex items-center justify-between rounded-2xl px-6 py-4 glass-strong">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pm/20">
                   <CheckCircle2 className="h-5 w-5 text-pm-fg" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Agente CEO: Operativo (100%)</p>
+                  <p className="text-sm font-semibold text-foreground">Agente CEO: Modo Gestión (100%)</p>
                   <p className="text-xs text-muted-foreground">Todos los vectores validados · ADN completo</p>
                 </div>
               </div>
@@ -253,11 +265,17 @@ export function CEOWorkspaceView() {
                   </button>
                 )}
                 <button
+                  onClick={() => setShowConsole((p) => !p)}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all glass-subtle hover:shadow-md ${showConsole ? "text-ceo-fg" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Terminal className="h-3.5 w-3.5" /> Consola
+                </button>
+                <button
                   onClick={() => setShowConfig((p) => !p)}
                   className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground glass-subtle hover:text-foreground hover:shadow-md transition-all"
                 >
                   <Settings2 className="h-3.5 w-3.5" />
-                  Ver Configuración
+                  Configuración
                   <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${showConfig ? "rotate-180" : ""}`} />
                 </button>
               </div>
@@ -265,8 +283,8 @@ export function CEOWorkspaceView() {
 
             {/* Collapsible config */}
             <div className={`transition-all duration-500 overflow-hidden ${showConfig ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div className="rounded-2xl p-5 glass">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="rounded-2xl p-5 glass flex flex-col items-center">
                   <HealthRing pct={100} size={80} />
                   <p className="mt-2 text-xs text-pm-fg font-medium">Sistema operativo</p>
                 </div>
@@ -276,73 +294,206 @@ export function CEOWorkspaceView() {
               </div>
             </div>
 
-            {/* PM Initialization Workspace */}
-            <div className="rounded-2xl p-6 glass-strong border border-pm/20 animate-fade-in">
-              <div className="flex items-center gap-2 mb-5">
-                <Terminal className="h-5 w-5 text-pm-fg" />
-                <h2 className="text-base font-semibold text-foreground">Inicializar Agente PM</h2>
+            {/* Autonomy Slider */}
+            <div className="rounded-2xl px-6 py-4 glass flex items-center gap-6">
+              <div className="flex items-center gap-2 shrink-0">
+                <Sparkles className="h-4 w-4 text-pm-fg" />
+                <span className="text-xs font-medium text-foreground">Autonomía del PM</span>
+              </div>
+              <div className="flex-1 max-w-xs">
+                <Slider
+                  value={[pmAutonomy]}
+                  onValueChange={([v]) => setPmAutonomy(v as AutonomyLevel)}
+                  min={0} max={2} step={1}
+                />
+              </div>
+              <div className="text-xs text-muted-foreground shrink-0">
+                <span className="text-foreground font-medium">{AUTONOMY_LEVEL_LABELS[pmAutonomy].label}</span>
+                {" — "}{AUTONOMY_LEVEL_LABELS[pmAutonomy].description}
+              </div>
+            </div>
+
+            {/* Two-column dashboard */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+              {/* Column 1: Roadmap del CEO */}
+              <div className="rounded-2xl p-5 glass-strong">
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="h-4 w-4 text-ceo-fg" />
+                  <h2 className="text-sm font-semibold text-foreground">Roadmap del CEO</h2>
+                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium glass-subtle text-muted-foreground">
+                    {ceoTasks.length} tareas
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {ceoTasks.map((task) => {
+                    const IconMap: Record<string, typeof BarChart3> = {
+                      analysis: BarChart3, structure: GitBranch, strategy: Target, delegation: Forward,
+                    };
+                    const TaskIcon = IconMap[task.type] || Target;
+                    return (
+                      <div key={task.id} className="rounded-xl p-4 glass group hover:shadow-lg transition-all duration-200">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ceo/10 shrink-0">
+                            <TaskIcon className="h-4 w-4 text-ceo-fg" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-medium text-foreground truncate">{task.title}</h3>
+                              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
+                                task.priority === "high" ? "bg-destructive/20 text-destructive" :
+                                task.priority === "medium" ? "bg-amber-500/20 text-amber-400" :
+                                "bg-muted text-muted-foreground"
+                              }`}>
+                                {task.priority}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{task.description}</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button
+                            onClick={() => toast.info(`Ejecutando: ${task.title}`)}
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-ceo-fg glass-subtle hover:shadow-md transition-all"
+                          >
+                            <Play className="h-3 w-3" /> Ejecutar Tarea
+                          </button>
+                          <button
+                            onClick={() => toast.info(`Delegando al PM: ${task.title}`)}
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-muted-foreground glass-subtle hover:text-foreground hover:shadow-md transition-all"
+                          >
+                            <Forward className="h-3 w-3" /> Delegar al PM
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Skills */}
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 block">
-                    Habilidades del PM
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {PM_SKILLS.map((skill) => (
-                      <button
-                        key={skill}
-                        onClick={() => toggleSkill(skill)}
-                        className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
-                          pmSkills.includes(skill)
-                            ? "glass text-pm-fg shadow-md ring-1 ring-pm/30"
-                            : "glass-subtle text-muted-foreground hover:text-foreground"
+              {/* Column 2: Bandeja de Revisión */}
+              <div className="rounded-2xl p-5 glass-strong">
+                <div className="flex items-center gap-2 mb-4">
+                  <MessageCircle className="h-4 w-4 text-pm-fg" />
+                  <h2 className="text-sm font-semibold text-foreground">Bandeja de Revisión</h2>
+                  <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold bg-pm/20 text-pm-fg">
+                    {submissions.filter((s) => s.status === "pending").length}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {submissions.filter((s) => s.status === "pending").map((sub) => {
+                    const bottleneck = isBottleneck(sub.submittedAt);
+                    return (
+                      <div
+                        key={sub.id}
+                        className={`rounded-xl p-4 glass transition-all duration-300 ${
+                          bottleneck ? "ring-2 ring-amber-500/40 animate-pulse" : ""
                         }`}
                       >
-                        {skill}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Autonomy */}
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 block">
-                    Nivel de Autonomía
-                  </label>
-                  <Slider
-                    value={[pmAutonomy]}
-                    onValueChange={([v]) => setPmAutonomy(v)}
-                    min={0} max={2} step={1}
-                    className="mb-2"
-                  />
-                  <div className="flex justify-between text-[10px] text-muted-foreground">
-                    {AUTONOMY_LABELS.map((l) => <span key={l}>{l}</span>)}
-                  </div>
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-pm/20 shrink-0">
+                            <User className="h-3.5 w-3.5 text-pm-fg" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="rounded-full px-2 py-0.5 text-[9px] font-medium bg-pm/20 text-pm-fg">
+                                Agente PM
+                              </span>
+                              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-2.5 w-2.5" /> {getTimeAgo(sub.submittedAt)}
+                              </span>
+                              {bottleneck && (
+                                <span className="text-[9px] text-amber-400 font-medium">⚠ Cuello de botella</span>
+                              )}
+                            </div>
+                            <h3 className="text-sm font-medium text-foreground">{sub.taskName}</h3>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Framework: {sub.framework}</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={() => { setReviewSubmission(sub); setReviewFeedback(""); }}
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all hover:shadow-md"
+                            style={{ background: "hsla(160, 84%, 39%, 0.15)", color: "hsl(160, 84%, 50%)" }}
+                          >
+                            <CheckCircle2 className="h-3 w-3" /> Revisar & Aprobar
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSubmissions((prev) => prev.map((s) => s.id === sub.id ? { ...s, status: "rejected" as const } : s));
+                              toast.error(`Rechazado: ${sub.taskName}`);
+                            }}
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-destructive/80 glass-subtle hover:text-destructive hover:shadow-md transition-all"
+                          >
+                            <XCircle className="h-3 w-3" /> Rechazar
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {submissions.filter((s) => s.status === "pending").length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground text-xs">
+                      Sin submissions pendientes
+                    </div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              <div className="mt-6 flex items-center gap-3">
+            {/* Reasoning Console */}
+            <div className={`transition-all duration-500 overflow-hidden ${showConsole ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div
+                className="rounded-2xl border overflow-hidden"
+                style={{ background: "hsla(220, 20%, 8%, 0.92)", borderColor: "hsla(0, 0%, 100%, 0.08)" }}
+              >
+                <div className="flex items-center gap-2 px-5 py-3 border-b" style={{ borderColor: "hsla(0, 0%, 100%, 0.06)" }}>
+                  <div className="flex gap-1">
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
+                  </div>
+                  <span className="ml-2 text-[11px] font-mono text-white/40 uppercase tracking-widest">
+                    Razonamiento de Agentes — Log
+                  </span>
+                </div>
+                <div className="px-5 py-4 space-y-2 max-h-[200px] overflow-auto scrollbar-thin font-mono text-[13px]">
+                  {AGENT_LOG_ENTRIES.map((entry, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <span className="text-white/20 text-[10px] shrink-0 mt-0.5">
+                        {entry.timestamp.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      <span className={`shrink-0 text-[11px] font-bold ${
+                        entry.agent === "CEO" ? "text-ceo-fg" : "text-pm-fg"
+                      }`}>
+                        [{entry.agent}]
+                      </span>
+                      <span className="text-white/70">{entry.message}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* PM Init button (if not started) */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleInitPM}
+                disabled={pmSkills.length === 0}
+                className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:shadow-xl hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: "hsla(160, 84%, 39%, 0.85)", backdropFilter: "blur(20px)" }}
+              >
+                <Sparkles className="h-4 w-4" />
+                Inicializar Agente PM
+              </button>
+              {!isLibroVivoComplete(id || "") && (
                 <button
-                  onClick={handleInitPM}
-                  disabled={pmSkills.length === 0}
-                  className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:shadow-xl hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{ background: "hsla(160, 84%, 39%, 0.85)", backdropFilter: "blur(20px)" }}
+                  onClick={handleSignLibroVivo}
+                  className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-foreground glass-subtle hover:shadow-lg transition-all"
                 >
-                  <Sparkles className="h-4 w-4" />
-                  Inicializar Agente PM
+                  <BookOpen className="h-4 w-4" />
+                  Firmar Libro Vivo
                 </button>
-                {!isLibroVivoComplete(id || "") && (
-                  <button
-                    onClick={handleSignLibroVivo}
-                    className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-foreground glass-subtle hover:shadow-lg transition-all"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    Firmar Libro Vivo
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
         )}
@@ -541,6 +692,83 @@ export function CEOWorkspaceView() {
         steps={executionSteps}
         agentLabel="Agente CEO"
       />
+
+      {/* Pull Request Review Modal */}
+      <Dialog open={!!reviewSubmission} onOpenChange={(open) => { if (!open) setReviewSubmission(null); }}>
+        <DialogContent className="max-w-4xl glass-strong border-pm/20" style={{ background: "hsla(220, 15%, 8%, 0.95)" }}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Eye className="h-5 w-5 text-pm-fg" />
+              Revisión — {reviewSubmission?.taskName}
+            </DialogTitle>
+          </DialogHeader>
+          {reviewSubmission && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Left: Context & Framework */}
+                <div className="rounded-xl p-4 glass">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Info className="h-4 w-4 text-ceo-fg" />
+                    <h3 className="text-sm font-semibold text-foreground">Contexto & Framework</h3>
+                    <span className="rounded-full px-2 py-0.5 text-[9px] font-medium bg-ceo/20 text-ceo-fg ml-auto">
+                      {reviewSubmission.framework}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line max-h-[300px] overflow-auto scrollbar-thin">
+                    {reviewSubmission.reasoning}
+                  </div>
+                </div>
+                {/* Right: Result */}
+                <div className="rounded-xl p-4 glass">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BookOpen className="h-4 w-4 text-pm-fg" />
+                    <h3 className="text-sm font-semibold text-foreground">Resultado del PM</h3>
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line max-h-[300px] overflow-auto scrollbar-thin">
+                    {reviewSubmission.resultPreview}
+                  </div>
+                </div>
+              </div>
+              {/* Feedback */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+                  Feedback (opcional)
+                </label>
+                <Textarea
+                  value={reviewFeedback}
+                  onChange={(e) => setReviewFeedback(e.target.value)}
+                  placeholder="Agregar comentarios o solicitar cambios..."
+                  className="glass border-white/10 text-sm min-h-[60px]"
+                />
+              </div>
+              {/* Actions */}
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setSubmissions((prev) => prev.map((s) => s.id === reviewSubmission.id ? { ...s, status: "rejected" as const } : s));
+                    toast.info(`Cambios solicitados: ${reviewSubmission.taskName}`);
+                    setReviewSubmission(null);
+                  }}
+                  className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-medium text-amber-400 glass-subtle hover:shadow-md transition-all"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" /> Pedir Cambios
+                </button>
+                <button
+                  onClick={() => {
+                    setSubmissions((prev) => prev.map((s) => s.id === reviewSubmission.id ? { ...s, status: "approved" as const } : s));
+                    toast.success(`Aprobado: ${reviewSubmission.taskName}`);
+                    setReviewSubmission(null);
+                  }}
+                  className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-medium text-white transition-all hover:shadow-xl"
+                  style={{ background: "hsla(160, 84%, 39%, 0.85)" }}
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Aprobar
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
