@@ -16,7 +16,7 @@ export function ExecutionConsole({ visible, steps, agentLabel }: ExecutionConsol
 
   return (
     <div
-      className="fixed bottom-0 left-16 right-0 z-30 transition-all duration-500"
+      className="fixed bottom-0 left-0 md:left-16 right-0 z-30 transition-all duration-500"
       style={{
         animation: visible ? "slideUp 0.4s ease-out" : "slideDown 0.3s ease-in",
       }}

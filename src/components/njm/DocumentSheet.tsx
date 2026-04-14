@@ -58,7 +58,7 @@ export function DocumentSheet({ open, onOpenChange, artifact }: DocumentSheetPro
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[40vw] glass-strong border-l border-white/30 p-0 flex flex-col"
+        className="w-full sm:max-w-[80vw] md:max-w-[40vw] glass-strong border-l border-white/30 p-0 flex flex-col"
       >
         {/* Header */}
         <SheetHeader className="border-b border-white/30 px-6 py-4">

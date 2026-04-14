@@ -1,7 +1,10 @@
-import { Building, ShieldCheck, Briefcase, Settings, Hexagon, BookOpen } from "lucide-react";
+import { Building, ShieldCheck, Briefcase, Settings, Hexagon, BookOpen, LogOut, Menu, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useBrandContext } from "@/context/BrandContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const navItems = [
   { path: "/", icon: Building, label: "Hub de Agencias", color: "agency" },
@@ -24,6 +27,8 @@ export function AppSidebar() {
   const { id } = useParams();
   const location = useLocation();
   const { isLibroVivoComplete } = useBrandContext();
+  const isMobile = useIsMobile();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const currentPath = location.pathname;
   const libroAvailable = id ? isLibroVivoComplete(id) : false;
@@ -35,70 +40,119 @@ export function AppSidebar() {
     return currentPath.includes(`/${check}`);
   };
 
+  const handleNav = (path: string) => {
+    navigate(path);
+    if (isMobile) setMobileOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("njm-auth");
+    toast.success("Sesión cerrada");
+    navigate("/login");
+  };
+
+  // Mobile hamburger trigger
+  if (isMobile && !mobileOpen) {
+    return (
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="fixed top-4 left-4 z-50 rounded-xl p-2.5 glass-strong shadow-lg"
+      >
+        <Menu className="h-5 w-5 text-foreground" />
+      </button>
+    );
+  }
+
   return (
-    <aside className="flex h-screen w-16 flex-col items-center py-4 glass-subtle rounded-r-2xl">
-      {/* Logo */}
-      <div className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl glass">
-        <Hexagon className="h-6 w-6 text-primary" />
-      </div>
+    <>
+      {/* Mobile overlay */}
+      {isMobile && mobileOpen && (
+        <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+      )}
 
-      {/* Main nav */}
-      <nav className="flex flex-1 flex-col items-center gap-1">
-        {navItems.map((item) => (
-          <SidebarButton
-            key={item.path}
-            icon={item.icon}
-            label={item.label}
-            active={isActive(item.path)}
-            colorClass={colorMap[item.color]}
-            onClick={() => navigate(item.path)}
-          />
-        ))}
+      <aside
+        className={`flex h-screen w-16 flex-col items-center py-4 glass-subtle rounded-r-2xl transition-transform duration-300 ${
+          isMobile ? "fixed left-0 top-0 z-50" : ""
+        }`}
+      >
+        {/* Logo + close on mobile */}
+        <div className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl glass relative">
+          {isMobile ? (
+            <button onClick={() => setMobileOpen(false)}>
+              <X className="h-5 w-5 text-foreground" />
+            </button>
+          ) : (
+            <Hexagon className="h-6 w-6 text-primary" />
+          )}
+        </div>
 
-        <div className="my-3 h-px w-8 bg-border/50" />
-
-        {agentItems.map((item) => {
-          const disabled = !id;
-          const active = isActive(item.pathSuffix);
-          return (
+        {/* Main nav */}
+        <nav className="flex flex-1 flex-col items-center gap-1">
+          {navItems.map((item) => (
             <SidebarButton
-              key={item.pathSuffix}
+              key={item.path}
               icon={item.icon}
-              label={disabled ? `${item.label} (selecciona marca)` : item.label}
-              active={active}
+              label={item.label}
+              active={isActive(item.path)}
               colorClass={colorMap[item.color]}
-              disabled={disabled}
-              onClick={() => {
-                if (!disabled) navigate(`/brand/${id}/${item.pathSuffix}`);
-              }}
+              onClick={() => handleNav(item.path)}
             />
-          );
-        })}
+          ))}
 
-        {/* Libro Vivo - only when signed */}
-        {libroAvailable && id && (
-          <>
-            <div className="my-2 h-px w-6 bg-border/30" />
-            <SidebarButton
-              icon={BookOpen}
-              label="Libro Vivo"
-              active={isActive("libro-vivo")}
-              colorClass={colorMap.libro}
-              onClick={() => navigate(`/brand/${id}/libro-vivo`)}
-            />
-          </>
-        )}
-      </nav>
+          <div className="my-3 h-px w-8 bg-border/50" />
 
-      {/* Settings */}
-      <SidebarButton
-        icon={Settings}
-        label="Configuración"
-        active={isActive("settings")}
-        colorClass="border-border text-foreground"
-        onClick={() => navigate("/settings")}
-      />
-    </aside>
+          {agentItems.map((item) => {
+            const disabled = !id;
+            const active = isActive(item.pathSuffix);
+            return (
+              <SidebarButton
+                key={item.pathSuffix}
+                icon={item.icon}
+                label={disabled ? `${item.label} (selecciona marca)` : item.label}
+                active={active}
+                colorClass={colorMap[item.color]}
+                disabled={disabled}
+                onClick={() => {
+                  if (!disabled) handleNav(`/brand/${id}/${item.pathSuffix}`);
+                }}
+              />
+            );
+          })}
+
+          {/* Libro Vivo - only when signed */}
+          {libroAvailable && id && (
+            <>
+              <div className="my-2 h-px w-6 bg-border/30" />
+              <SidebarButton
+                icon={BookOpen}
+                label="Libro Vivo"
+                active={isActive("libro-vivo")}
+                colorClass={colorMap.libro}
+                onClick={() => handleNav(`/brand/${id}/libro-vivo`)}
+              />
+            </>
+          )}
+        </nav>
+
+        {/* Bottom actions */}
+        <div className="flex flex-col items-center gap-1">
+          <SidebarButton
+            icon={Settings}
+            label="Configuración"
+            active={isActive("settings")}
+            colorClass="border-border text-foreground"
+            onClick={() => handleNav("/settings")}
+          />
+          <SidebarButton
+            icon={LogOut}
+            label="Cerrar Sesión"
+            active={false}
+            colorClass="border-border text-destructive"
+            onClick={handleLogout}
+          />
+        </div>
+      </aside>
+    </>
   );
 }
 
@@ -133,7 +187,7 @@ function SidebarButton({
         >
           {active && !disabled && (
             <span
-              className="absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-r bg-current"
+              className="absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-r bg-current transition-all duration-300"
               style={{ left: "-8px" }}
             />
           )}
