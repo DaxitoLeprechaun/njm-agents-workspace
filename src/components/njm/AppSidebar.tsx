@@ -1,4 +1,5 @@
-import { Building, ShieldCheck, Briefcase, Settings, Hexagon, BookOpen, LogOut, Menu, X } from "lucide-react";
+import { Building, ShieldCheck, Briefcase, Settings, Hexagon, BookOpen, LogOut, Menu, X, Bell } from "lucide-react";
+import { ActivityFeedDrawer } from "@/components/njm/ActivityFeedDrawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useBrandContext } from "@/context/BrandContext";
@@ -29,6 +30,7 @@ export function AppSidebar() {
   const { isLibroVivoComplete } = useBrandContext();
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [feedOpen, setFeedOpen] = useState(false);
 
   const currentPath = location.pathname;
   const libroAvailable = id ? isLibroVivoComplete(id) : false;
@@ -136,6 +138,20 @@ export function AppSidebar() {
 
         {/* Bottom actions */}
         <div className="flex flex-col items-center gap-1">
+          {/* Notification bell */}
+          <div className="relative">
+            <SidebarButton
+              icon={Bell}
+              label="Actividad Reciente"
+              active={feedOpen}
+              colorClass="border-agency text-agency"
+              onClick={() => setFeedOpen(true)}
+            />
+            <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[8px] font-bold text-white">
+              7
+            </span>
+          </div>
+          <div className="my-1 h-px w-6 bg-border/30" />
           <SidebarButton
             icon={Settings}
             label="Configuración"
@@ -152,6 +168,8 @@ export function AppSidebar() {
           />
         </div>
       </aside>
+
+      <ActivityFeedDrawer open={feedOpen} onOpenChange={setFeedOpen} />
     </>
   );
 }

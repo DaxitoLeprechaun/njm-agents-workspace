@@ -12,6 +12,7 @@ import PMPage from "./pages/PMPage";
 import LibroVivoPage from "./pages/LibroVivoPage";
 import SettingsPage from "./pages/SettingsPage";
 import LoginPage from "./pages/LoginPage";
+import BrandOverviewPage from "./pages/BrandOverviewPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             }
           >
             <Route path="/" element={<Index />} />
+            <Route path="/brand/:id" element={<BrandOverviewPage />} />
             <Route path="/brand/:id/ceo" element={<CEOPage />} />
             <Route path="/brand/:id/pm" element={<PMPage />} />
             <Route path="/brand/:id/libro-vivo" element={<LibroVivoPage />} />

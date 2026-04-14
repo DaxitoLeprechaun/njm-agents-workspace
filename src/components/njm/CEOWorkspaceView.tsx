@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare, Play, BookOpen, Eye } from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare, Play, BookOpen, Eye, Filter } from "lucide-react";
 import { getBrand } from "@/data/brands";
 import { useBrandContext } from "@/context/BrandContext";
 import { toast } from "sonner";
@@ -23,6 +23,23 @@ export function CEOWorkspaceView() {
   const vectors = getVectors(id || "");
 
   const allValidated = vectors.length > 0 && vectors.every((v) => v.validated);
+
+  // Filter state
+  const [categoryFilter, setCategoryFilter] = useState("Todos");
+  const [statusFilter, setStatusFilter] = useState<"all" | "validated" | "pending">("all");
+
+  const categories = useMemo(() => {
+    const cats = new Set(vectors.map((v) => v.category));
+    return ["Todos", ...Array.from(cats)];
+  }, [vectors]);
+
+  const filteredVectors = useMemo(() => {
+    return vectors.filter((v) => {
+      const matchCat = categoryFilter === "Todos" || v.category === categoryFilter;
+      const matchStatus = statusFilter === "all" || (statusFilter === "validated" ? v.validated : !v.validated);
+      return matchCat && matchStatus;
+    });
+  }, [vectors, categoryFilter, statusFilter]);
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -103,8 +120,37 @@ export function CEOWorkspaceView() {
       </header>
 
       <main className="flex-1 p-8 pb-24">
+        {/* Filter toolbar */}
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground mr-1" />
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategoryFilter(cat)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ${
+                categoryFilter === cat ? "glass text-ceo-fg shadow-md" : "glass-subtle text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+          <div className="ml-auto flex gap-1.5">
+            {(["all", "validated", "pending"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ${
+                  statusFilter === s ? "glass text-foreground shadow-md" : "glass-subtle text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {s === "all" ? "Todos" : s === "validated" ? "Validados" : "Pendientes"}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {vectors.map((v, i) => {
+          {filteredVectors.map((v, i) => {
             const isBeingScanned = scanningVectorId === v.id;
             return (
               <div

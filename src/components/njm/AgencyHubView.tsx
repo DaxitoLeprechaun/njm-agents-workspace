@@ -1,4 +1,5 @@
-import { Plus, TrendingUp } from "lucide-react";
+import { useState } from "react";
+import { Plus, TrendingUp, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { brands } from "@/data/brands";
 
@@ -8,8 +9,18 @@ const statusColors: Record<string, string> = {
   Pausado: "bg-muted text-muted-foreground",
 };
 
+const statusOptions = ["Todos", "Activo", "En Setup", "Pausado"] as const;
+
 export function AgencyHubView() {
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("Todos");
+
+  const filtered = brands.filter((b) => {
+    const matchesSearch = !search || b.name.toLowerCase().includes(search.toLowerCase()) || b.sector.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "Todos" || b.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin animate-fade-in">
@@ -19,14 +30,43 @@ export function AgencyHubView() {
           <span className="text-agency-fg">Hub de Agencias</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">Gestión de micro-agencias</p>
+
+        {/* Search + filter */}
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar marca o sector..."
+              className="w-full rounded-xl py-2 pl-9 pr-3 text-sm glass-subtle border-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-agency/40"
+            />
+          </div>
+          <div className="flex gap-1.5">
+            {statusOptions.map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ${
+                  statusFilter === s
+                    ? "glass text-agency-fg shadow-md"
+                    : "glass-subtle text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
       </header>
 
       <main className="flex-1 p-8">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {brands.map((brand, i) => (
+          {filtered.map((brand, i) => (
             <button
               key={brand.id}
-              onClick={() => navigate(`/brand/${brand.id}/ceo`)}
+              onClick={() => navigate(`/brand/${brand.id}`)}
               className="group relative rounded-2xl p-5 text-left transition-all duration-300 glass hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]"
               style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
             >
