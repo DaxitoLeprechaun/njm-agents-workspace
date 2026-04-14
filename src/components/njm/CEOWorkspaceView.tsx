@@ -20,9 +20,9 @@ const vectors: Vector[] = [
 export function CEOWorkspaceView() {
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin">
-      <header className="sticky top-0 z-10 border-b border-border bg-surface-0/80 px-8 py-5 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ceo/10">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl glass bg-ceo/10">
             <ShieldCheck className="h-5 w-5 text-ceo-fg" />
           </div>
           <div>
@@ -37,11 +37,12 @@ export function CEOWorkspaceView() {
           {vectors.map((v) => (
             <div
               key={v.id}
-              className={`group rounded-xl border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+              className={`group rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:scale-[1.02] ${
                 v.validated
-                  ? "border-pm/30 bg-card hover:border-pm/50 hover:shadow-pm/5"
-                  : "border-destructive/30 bg-card hover:border-destructive/50 hover:shadow-destructive/5"
+                  ? "glass border-pm/20 hover:border-pm/40"
+                  : "glass border-destructive/20 hover:border-destructive/40"
               }`}
+              style={v.validated ? { borderColor: 'hsla(160, 84%, 39%, 0.2)' } : { borderColor: 'hsla(0, 84%, 60%, 0.2)' }}
             >
               <div className="flex items-start gap-3">
                 {v.validated ? (
@@ -59,10 +60,10 @@ export function CEOWorkspaceView() {
 
               {!v.validated && (
                 <div className="mt-4 flex gap-2">
-                  <button className="flex items-center gap-1.5 rounded-md bg-surface-2 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground">
+                  <button className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 glass-subtle hover:shadow-md hover:text-foreground">
                     <FileUp className="h-3.5 w-3.5" /> Doc
                   </button>
-                  <button className="flex items-center gap-1.5 rounded-md bg-surface-2 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground">
+                  <button className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 glass-subtle hover:shadow-md hover:text-foreground">
                     <MessageSquare className="h-3.5 w-3.5" /> Briefing
                   </button>
                 </div>
@@ -74,7 +75,7 @@ export function CEOWorkspaceView() {
 
       {/* Floating action */}
       <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
-        <button className="flex items-center gap-2 rounded-full bg-ceo px-6 py-3 font-medium text-foreground shadow-xl shadow-ceo/20 transition-all duration-200 hover:shadow-2xl hover:shadow-ceo/30 hover:scale-105">
+        <button className="flex items-center gap-2 rounded-full px-6 py-3 font-medium text-primary-foreground shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 bg-ceo glass-strong" style={{ background: 'hsla(271, 81%, 56%, 0.85)', backdropFilter: 'blur(20px)', color: 'white' }}>
           <Play className="h-4 w-4" />
           Invocar Auditoría Automática
         </button>

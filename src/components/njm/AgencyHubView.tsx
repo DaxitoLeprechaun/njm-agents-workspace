@@ -29,7 +29,7 @@ interface AgencyHubViewProps {
 export function AgencyHubView({ onBrandSelect }: AgencyHubViewProps) {
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin">
-      <header className="sticky top-0 z-10 border-b border-border bg-surface-0/80 px-8 py-5 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           NJM OS — <span className="text-agency-fg">Hub de Agencia</span>
         </h1>
@@ -42,14 +42,14 @@ export function AgencyHubView({ onBrandSelect }: AgencyHubViewProps) {
             <button
               key={brand.id}
               onClick={() => onBrandSelect(brand.id)}
-              className="group relative rounded-xl border border-border bg-card p-5 text-left transition-all duration-200 hover:border-agency/40 hover:shadow-lg hover:shadow-agency/5 hover:-translate-y-0.5"
+              className="group relative rounded-2xl p-5 text-left transition-all duration-300 glass hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]"
             >
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-semibold text-foreground">{brand.name}</h3>
                   <p className="mt-0.5 text-xs text-muted-foreground">{brand.sector}</p>
                 </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium ${statusColors[brand.status]}`}>
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium glass-subtle ${statusColors[brand.status]}`}>
                   {brand.status}
                 </span>
               </div>
@@ -59,20 +59,20 @@ export function AgencyHubView({ onBrandSelect }: AgencyHubViewProps) {
                   <span className="text-muted-foreground">Salud del Libro Vivo</span>
                   <span className="font-medium text-foreground">{brand.health}%</span>
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-3">
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-3/50">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-agency to-agency-fg transition-all duration-500"
+                    className="h-full rounded-full bg-gradient-to-r from-agency to-pm transition-all duration-500"
                     style={{ width: `${brand.health}%` }}
                   />
                 </div>
               </div>
 
-              <TrendingUp className="absolute bottom-4 right-4 h-4 w-4 text-muted-foreground/30 transition-colors group-hover:text-agency-fg/50" />
+              <TrendingUp className="absolute bottom-4 right-4 h-4 w-4 text-muted-foreground/30 transition-colors group-hover:text-agency-fg/60" />
             </button>
           ))}
 
           {/* Add new brand */}
-          <button className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-transparent p-5 text-muted-foreground transition-all duration-200 hover:border-agency/40 hover:text-agency-fg">
+          <button className="flex min-h-[140px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/40 bg-white/20 p-5 text-muted-foreground transition-all duration-300 hover:bg-white/40 hover:text-agency-fg hover:border-agency/40 hover:shadow-lg">
             <Plus className="mb-2 h-6 w-6" />
             <span className="text-sm font-medium">Agregar Marca</span>
           </button>

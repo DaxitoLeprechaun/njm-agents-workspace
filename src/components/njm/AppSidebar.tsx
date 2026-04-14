@@ -25,9 +25,9 @@ const colorMap: Record<string, string> = {
 
 export function AppSidebar({ activeView, onViewChange }: AppSidebarProps) {
   return (
-    <aside className="flex h-screen w-16 flex-col items-center border-r border-border bg-surface-0 py-4">
+    <aside className="flex h-screen w-16 flex-col items-center py-4 glass-subtle rounded-r-2xl">
       {/* Logo */}
-      <div className="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+      <div className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl glass">
         <Hexagon className="h-6 w-6 text-primary" />
       </div>
 
@@ -44,7 +44,7 @@ export function AppSidebar({ activeView, onViewChange }: AppSidebarProps) {
           />
         ))}
 
-        <div className="my-3 h-px w-8 bg-border" />
+        <div className="my-3 h-px w-8 bg-border/50" />
 
         {agentItems.map((item) => (
           <SidebarButton
@@ -61,7 +61,7 @@ export function AppSidebar({ activeView, onViewChange }: AppSidebarProps) {
       {/* Bottom */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <button className="rounded-lg p-2.5 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground">
+          <button className="rounded-xl p-2.5 text-muted-foreground transition-all duration-300 hover:text-foreground glass-subtle hover:shadow-lg">
             <Settings className="h-5 w-5" />
           </button>
         </TooltipTrigger>
@@ -89,22 +89,22 @@ function SidebarButton({
       <TooltipTrigger asChild>
         <button
           onClick={onClick}
-          className={`relative rounded-lg p-2.5 transition-all duration-200 ${
+          className={`relative rounded-xl p-2.5 transition-all duration-300 ${
             active
-              ? `${colorClass} bg-surface-2`
-              : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+              ? `${colorClass} glass shadow-lg`
+              : "text-muted-foreground hover:text-foreground glass-subtle hover:shadow-md"
           }`}
         >
           {active && (
             <span
-              className={`absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-r ${colorClass.split(" ")[0]} bg-current`}
+              className={`absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-r ${colorMap[active ? colorClass.split(" ")[0].replace("border-", "") : ""]?.split(" ")[0] ?? colorClass.split(" ")[0]} bg-current`}
               style={{ left: "-8px" }}
             />
           )}
           <Icon className="h-5 w-5" />
         </button>
       </TooltipTrigger>
-      <TooltipContent side="right">{label}</TooltipContent>
+      <TooltipContent side="right" className="glass-strong border-none">{label}</TooltipContent>
     </Tooltip>
   );
 }
