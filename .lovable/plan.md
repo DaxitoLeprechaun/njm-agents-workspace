@@ -1,82 +1,105 @@
 
 
-# Recomendaciones para NJM OS — Siguiente Fase
+# NJM OS — 4 Piezas Finales del Frontend
 
-Basado en el estado actual del proyecto, estas son las 5 mejoras prioritarias ordenadas por impacto:
+## Resumen
 
----
-
-## 1. Breadcrumb Contextual + Header Mejorado
-
-Agregar un breadcrumb navegable en el header de cada workspace que muestre la jerarquía: **Hub > Agencia-Disrupt > CEO**.
-
-- Usar el componente `Breadcrumb` de Shadcn que ya existe en el proyecto
-- Integrar en el header de `CEOWorkspaceView` y `PMWorkspaceView`
-- Links clickeables para navegar hacia atrás
-
-**Archivos**: `CEOWorkspaceView.tsx`, `PMWorkspaceView.tsx`
+Implementar las 4 piezas UI faltantes: (1) Modal de ingesta de datos, (2) Consola de razonamiento del agente, (3) Visor del Libro Vivo, y (4) Página de configuración global.
 
 ---
 
-## 2. Animación "Invocar CEO para Auditoría"
+## 1. Estación de Ingesta — Data Onboarding Modal
 
-Dar funcionalidad real al botón flotante del CEO. Al hacer clic, ejecutar una animación secuencial que "escanea" cada vector estratégico:
+**Archivo**: `src/components/njm/DataIngestionModal.tsx`
 
-- Cada card se ilumina brevemente con un borde pulsante
-- Los vectores incompletos cambian a validados uno por uno (con delay)
-- Una vez completados todos, el botón "Generar Libro Vivo" aparece con animación
-- Usar CSS transitions y `setTimeout` encadenados (sin dependencia de framer-motion)
+- Shadcn `<Dialog>` con dos secciones dentro:
+  - **Zona Drag & Drop**: Div estilizado con borde dashed, iconos de archivo, estados hover/active. Acepta visualmente PDFs/Excel (sin backend real, solo UI mock con estado local de archivos "subidos").
+  - **Textarea estructurada**: Preguntas del CEO según el vector seleccionado (ej. "¿Cuál es la promesa única de valor?"). Usar `<Textarea>` de Shadcn.
+- Footer con botones "Cancelar" y "Enviar al CEO" (emerald).
+- Recibe `vectorName` y `vectorCategory` como props para contextualizar las preguntas.
 
-**Archivos**: `CEOWorkspaceView.tsx`, posiblemente nueva utilidad de animación
-
----
-
-## 3. Transición Animada entre Vistas
-
-Agregar animaciones de entrada/salida al navegar entre las 3 vistas:
-
-- Fade-in + slide sutil al montar cada workspace
-- Cards con stagger animation (aparecen secuencialmente)
-- Implementar con CSS `@keyframes` + clases de Tailwind (`animate-in`, delays escalonados)
-
-**Archivos**: `AgencyHubView.tsx`, `CEOWorkspaceView.tsx`, `PMWorkspaceView.tsx`, `index.css`
+**Integración en `CEOWorkspaceView.tsx`**:
+- Botón "Upload Doc" → abre el modal en modo drag & drop.
+- Botón "Briefing" → abre el modal en modo textarea/preguntas.
+- Ambos botones ya existen en las cards pendientes; solo falta conectarlos al modal.
 
 ---
 
-## 4. Estado Global con Context API
+## 2. Consola de Razonamiento — Agent Execution Log
 
-Actualmente los vectores se resetean al navegar. Crear un `BrandContext` que persista:
+**Archivo**: `src/components/njm/ExecutionConsole.tsx`
 
-- Estado de vectores validados por marca
-- Estado de `libroVivoComplete` modificable (cuando el CEO firma)
-- Permitir que al firmar el Libro Vivo en CEO, el PM workspace se desbloquee dinámicamente
+- Panel fijo en la parte inferior de la pantalla (bottom drawer), altura ~200px, aparece solo durante `isScanning`.
+- Estilo terminal minimalista: fondo slate-950, tipografía mono, bordes glass.
+- Muestra pasos secuenciales con iconos de estado:
+  - `[✓]` completado (emerald)
+  - `[⏳]` en progreso (amber, con pulse)
+  - `[ ]` pendiente (muted)
+- Los pasos se derivan del `scanningVectorId` actual y la lista de vectores pendientes.
+- Animación de entrada slide-up, salida slide-down.
 
-**Archivos**: Crear `src/context/BrandContext.tsx`, integrar en `AppLayout.tsx`
+**Integración**:
+- Renderizar en `CEOWorkspaceView` y `PMWorkspaceView` condicionalmente.
+- En BrandContext, agregar un array `executionSteps` que se actualiza durante `runCEOAudit`.
+- Para el PM, agregar lógica similar con pasos tipo "Leyendo Libro Vivo → Evaluando Framework → Redactando..."
+
+**Cambios en `BrandContext.tsx`**:
+- Nuevo estado: `executionLog: { label: string; status: 'done' | 'active' | 'pending' }[]`
+- Se actualiza en cada paso del `runCEOAudit` para alimentar la consola.
 
 ---
 
-## 5. Notificaciones y Feedback Visual
+## 3. Visor del Libro Vivo
 
-Agregar toasts y micro-feedback para acciones del usuario:
+**Archivo**: `src/components/njm/LibroVivoViewer.tsx`
+**Página**: `src/pages/LibroVivoPage.tsx`
+**Ruta**: `/brand/:id/libro-vivo`
 
-- Toast al validar un vector ("Vector validado correctamente")
-- Toast al firmar el Libro Vivo ("Libro Vivo generado — PM desbloqueado")
-- Toast al aprobar un documento en el Sheet
-- Usar el componente Sonner que ya está integrado
+- Full-screen Sheet (Shadcn `<Sheet>` al 80% de ancho) O página dedicada. Recomiendo **página dedicada** para que tenga su propia URL y se pueda compartir.
+- Layout tipo manual de marca premium:
+  - Header con nombre de marca, fecha de firma, badge "Firmado por CEO".
+  - Secciones divididas por categoría: **Núcleo**, **Negocio**, **Audiencia**, **Marca**, **Growth**.
+  - Cada sección muestra los vectores validados con su summary, en cards de solo lectura con tipografía serif/elegante.
+  - Al final: sección "Matriz Cognitiva del PM" con los parámetros que el CEO define para el agente PM.
+- Datos consumidos desde `BrandContext.getVectors(id)`.
+- Accesible desde: botón "Ver Libro Vivo" en CEO (post-firma) y link en sidebar/breadcrumb.
 
-**Archivos**: `CEOWorkspaceView.tsx`, `PMWorkspaceView.tsx`, `DocumentSheet.tsx`
+**Cambios en `App.tsx`**: Agregar ruta `/brand/:id/libro-vivo`.
+**Cambios en `AppSidebar.tsx`**: Agregar icono BookOpen como tercer item de agente (solo visible si Libro Vivo está firmado).
 
 ---
 
-## Orden de Ejecución Recomendado
+## 4. Estación de Configuración Global
 
-1. **Estado Global** (prerequisito para que las demás features funcionen correctamente)
-2. **Breadcrumb** (rápido, mejora la navegación inmediatamente)
-3. **Notificaciones** (bajo esfuerzo, alto impacto en UX)
-4. **Animación CEO Audit** (feature estrella para demos)
-5. **Transiciones entre vistas** (polish final)
+**Archivo**: `src/components/njm/SettingsView.tsx`
+**Página**: `src/pages/SettingsPage.tsx`
+**Ruta**: `/settings`
 
-## Estimación
+- Layout estándar con secciones en tabs o accordion:
+  - **API Keys**: Campo de input para clave de Anthropic (tipo password, con toggle show/hide). Guardado en estado local (mock, sin backend).
+  - **Rutas Locales**: Input de texto para ruta absoluta de exportación. Placeholder: `/Users/tu-usuario/NJM_OS/Marcas/`.
+  - **Gestión de Marcas**: Lista de marcas actuales con acciones: renombrar (inline edit) y dar de baja (con confirmación via AlertDialog).
+- Botón "Guardar Configuración" con toast de confirmación.
 
-Total: ~5 archivos nuevos/modificados. Todo se implementa con las herramientas ya disponibles en el proyecto (Shadcn, Tailwind, React Context). Sin dependencias nuevas.
+**Cambios en `App.tsx`**: Agregar ruta `/settings`.
+**Cambios en `AppSidebar.tsx`**: El botón de engranaje navega a `/settings` en lugar de ser decorativo.
+
+---
+
+## Archivos a Crear/Modificar
+
+| Archivo | Acción |
+|---------|--------|
+| `src/components/njm/DataIngestionModal.tsx` | Crear |
+| `src/components/njm/ExecutionConsole.tsx` | Crear |
+| `src/components/njm/LibroVivoViewer.tsx` | Crear |
+| `src/components/njm/SettingsView.tsx` | Crear |
+| `src/pages/LibroVivoPage.tsx` | Crear |
+| `src/pages/SettingsPage.tsx` | Crear |
+| `src/context/BrandContext.tsx` | Agregar executionLog + lógica PM |
+| `src/components/njm/CEOWorkspaceView.tsx` | Conectar modal + consola + link Libro Vivo |
+| `src/components/njm/PMWorkspaceView.tsx` | Agregar consola de ejecución |
+| `src/components/njm/AppSidebar.tsx` | Settings navega a /settings, agregar Libro Vivo |
+| `src/App.tsx` | Agregar rutas /settings y /brand/:id/libro-vivo |
+| `src/data/brands.ts` | Agregar datos mock para Libro Vivo sections |
 
