@@ -15,9 +15,10 @@ export function AgencyHubView() {
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin">
       <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          NJM OS — <span className="text-agency-fg">Hub de Agencia</span>
+          NJM OS<br />
+          <span className="text-agency-fg">Hub de Agencias</span>
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">Gestiona todas tus marcas desde un solo lugar</p>
+        <p className="mt-1 text-sm text-muted-foreground">Gestión de micro-agencias</p>
       </header>
 
       <main className="flex-1 p-8">
