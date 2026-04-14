@@ -113,6 +113,50 @@ export const AUTONOMY_LEVEL_LABELS: Record<AutonomyLevel, { label: string; descr
   2: { label: "Autonomía total", description: "Notificar solo al completar" },
 };
 
+/* ── Available Agents (Hiring Core) ────────────────────── */
+
+export type AgentStatus = "active" | "available" | "locked";
+
+export interface AvailableAgent {
+  id: string;
+  name: string;
+  role: string;
+  status: AgentStatus;
+  skills: string[];
+  color: string;
+  icon: string; // lucide icon name hint
+}
+
+export const AVAILABLE_AGENTS: AvailableAgent[] = [
+  {
+    id: "pm",
+    name: "Agente PM",
+    role: "Project Manager",
+    status: "active",
+    skills: ["Análisis Competitivo", "Research", "Roadmapping"],
+    color: "pm",
+    icon: "clipboard-list",
+  },
+  {
+    id: "mkt",
+    name: "Agente Marketing",
+    role: "Growth & Ads",
+    status: "locked",
+    skills: ["Paid Media", "Content Strategy", "Analytics"],
+    color: "ceo",
+    icon: "megaphone",
+  },
+  {
+    id: "sales",
+    name: "Agente Ventas",
+    role: "Sales & CRM",
+    status: "locked",
+    skills: ["Pipeline Management", "Lead Scoring", "Outreach"],
+    color: "ceo",
+    icon: "handshake",
+  },
+];
+
 /* ── Helpers ────────────────────────────────────────────── */
 
 export function getTimeAgo(date: Date): string {
