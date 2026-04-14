@@ -6,9 +6,17 @@ import {
   Inbox, ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare,
   Play, BookOpen, Eye, Filter, Info, ChevronDown, Settings2, Zap,
   Terminal, Sparkles, CircleDot, Layers,
+  BarChart3, GitBranch, Target, Forward, Clock, XCircle, MessageCircle, User,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Slider } from "@/components/ui/slider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  CEO_ROADMAP_TASKS, PM_SUBMISSIONS, AGENT_LOG_ENTRIES, AUTONOMY_LEVEL_LABELS,
+  getTimeAgo, isBottleneck,
+  type CEOTask, type PMSubmission, type AutonomyLevel,
+} from "@/data/ceoManagement";
 
 const CATEGORY_DEFINITIONS: Record<string, string> = {
   Core: "Vectores fundamentales que definen la esencia de la marca: propósito, propuesta de valor y diferenciación.",
