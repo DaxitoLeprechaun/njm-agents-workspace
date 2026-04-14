@@ -26,7 +26,6 @@ const CATEGORY_DEFINITIONS: Record<string, string> = {
 };
 
 const PM_SKILLS = ["Análisis Competitivo", "Research", "Generación de Contenido", "Roadmapping"];
-const AUTONOMY_LABELS = ["Supervisado", "Semi-Autónomo", "Autónomo"];
 
 import { getBrand } from "@/data/brands";
 import { useBrandContext } from "@/context/BrandContext";
