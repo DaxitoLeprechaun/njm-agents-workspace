@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { WorkspaceSkeleton } from "@/components/njm/WorkspaceSkeleton";
+import { EmptyState } from "@/components/njm/EmptyState";
 import { Briefcase, FileText, Zap, Lock, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getBrand, getArtifactsForBrand } from "@/data/brands";

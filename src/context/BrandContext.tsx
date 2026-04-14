@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { strategicVectors as initialVectors, type StrategicVector } from "@/data/brands";
+import { strategicVectors as initialVectors, type StrategicVector, getBrand } from "@/data/brands";
 import type { ExecutionStep } from "@/components/njm/ExecutionConsole";
+import { toast } from "sonner";
 
 interface BrandState {
   vectors: Record<string, StrategicVector[]>;

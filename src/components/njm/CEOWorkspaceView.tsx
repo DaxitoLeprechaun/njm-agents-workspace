@@ -1,5 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { WorkspaceSkeleton } from "@/components/njm/WorkspaceSkeleton";
+import { EmptyState } from "@/components/njm/EmptyState";
+import { Inbox } from "lucide-react";
 import { ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare, Play, BookOpen, Eye, Filter, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
