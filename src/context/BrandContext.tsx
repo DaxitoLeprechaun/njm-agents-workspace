@@ -86,6 +86,9 @@ export function BrandProvider({ children }: { children: ReactNode }) {
       ...prev,
       libroVivoStatus: { ...prev.libroVivoStatus, [brandId]: true },
     }));
+    toast.success("✅ CEO: Libro Vivo firmado y sellado", {
+      description: "El workspace del Agente PM ha sido desbloqueado.",
+    });
   }, []);
 
   const runCEOAudit = useCallback(
@@ -121,6 +124,9 @@ export function BrandProvider({ children }: { children: ReactNode }) {
             setExecutionSteps((prev) =>
               prev.map((s, si) => (si === i ? { ...s, status: "done" } : s))
             );
+            toast(`📋 CEO: ${v.name} validado`, {
+              description: `Vector [${v.category}] analizado correctamente.`,
+            });
             if (i === pending.length - 1) {
               setTimeout(() => {
                 setScanningVectorId(null);
@@ -157,12 +163,19 @@ export function BrandProvider({ children }: { children: ReactNode }) {
           if (i === pmStepLabels.length - 1) {
             setTimeout(() => {
               setPMExecutionSteps((prev) => prev.map((s) => ({ ...s, status: "done" })));
+              toast.success("✅ PM: Análisis táctico completado", {
+                description: "Todos los frameworks han sido evaluados con éxito.",
+              });
               setTimeout(() => {
                 setIsPMRunning(false);
                 setTimeout(() => setPMExecutionSteps([]), 2000);
                 onComplete?.();
               }, 600);
             }, 800);
+          } else {
+            toast(`📊 PM: ${pmStepLabels[i].replace("...", "")}`, {
+              duration: 2000,
+            });
           }
         }, i * 1200);
       });
