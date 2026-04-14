@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, Briefcase, BookOpen, TrendingUp, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ShieldCheck, Briefcase, BookOpen } from "lucide-react";
 import { getBrand } from "@/data/brands";
 import { useBrandContext } from "@/context/BrandContext";
 import {
@@ -10,11 +10,7 @@ export function BrandOverviewView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const brand = getBrand(id || "");
-  const { getVectors, isLibroVivoComplete } = useBrandContext();
-  const vectors = getVectors(id || "");
-  const validated = vectors.filter((v) => v.validated).length;
-  const total = vectors.length;
-  const pct = total > 0 ? Math.round((validated / total) * 100) : 0;
+  const { isLibroVivoComplete } = useBrandContext();
   const libroSigned = isLibroVivoComplete(id || "");
 
   if (!brand) {
@@ -32,11 +28,6 @@ export function BrandOverviewView() {
       ? [{ label: "Libro Vivo", desc: "Fuente de verdad estratégica", icon: BookOpen, color: "pm" as const, path: `/brand/${id}/libro-vivo` }]
       : []),
   ];
-
-  // SVG ring
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (brand.health / 100) * circumference;
 
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin animate-fade-in">
@@ -60,70 +51,6 @@ export function BrandOverviewView() {
 
       <main className="flex-1 p-8">
         <div className="mx-auto max-w-4xl space-y-8">
-          {/* Health + Vectors stats */}
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            {/* Health ring */}
-            <div className="flex flex-col items-center rounded-2xl p-6 glass">
-              <svg width="100" height="100" className="-rotate-90">
-                <circle cx="50" cy="50" r={radius} fill="none" stroke="hsla(0,0%,100%,0.1)" strokeWidth="8" />
-                <circle
-                  cx="50" cy="50" r={radius} fill="none"
-                  stroke="hsl(var(--pm))" strokeWidth="8" strokeLinecap="round"
-                  strokeDasharray={circumference} strokeDashoffset={offset}
-                  className="transition-all duration-700"
-                />
-              </svg>
-              <span className="mt-3 text-2xl font-bold text-foreground">{brand.health}%</span>
-              <span className="text-xs text-muted-foreground">Salud del Libro Vivo</span>
-            </div>
-
-            {/* Vector progress */}
-            <div className="flex flex-col justify-center rounded-2xl p-6 glass">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="h-4 w-4 text-pm-fg" />
-                <span className="text-sm font-medium text-foreground">{validated} / {total} Vectores Validados</span>
-              </div>
-              <div className="h-2 rounded-full bg-surface-3/50 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-ceo to-pm transition-all duration-500"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-              <div className="mt-3 flex gap-2 flex-wrap">
-                {vectors.map((v) => (
-                  <span
-                    key={v.id}
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      v.validated ? "bg-pm/20 text-pm-fg" : "bg-destructive/20 text-destructive"
-                    }`}
-                  >
-                    {v.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Status */}
-            <div className="flex flex-col justify-center rounded-2xl p-6 glass">
-              <div className="flex items-center gap-2 mb-3">
-                {libroSigned ? (
-                  <>
-                    <CheckCircle2 className="h-5 w-5 text-pm-fg" />
-                    <span className="text-sm font-medium text-pm-fg">Libro Vivo Firmado</span>
-                  </>
-                ) : (
-                  <>
-                    <AlertTriangle className="h-5 w-5 text-destructive" />
-                    <span className="text-sm font-medium text-destructive">Libro Vivo Pendiente</span>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{brand.sector}</span>
-              </div>
-            </div>
-          </div>
 
           {/* Workspace cards */}
           <div>
