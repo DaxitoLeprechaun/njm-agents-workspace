@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import {
   CEO_ROADMAP_TASKS, PM_SUBMISSIONS, AGENT_LOG_ENTRIES, AUTONOMY_LEVEL_LABELS,
+  AVAILABLE_AGENTS,
   getTimeAgo, isBottleneck,
   type CEOTask, type PMSubmission, type AutonomyLevel,
 } from "@/data/ceoManagement";
