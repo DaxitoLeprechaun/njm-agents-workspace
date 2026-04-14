@@ -1,7 +1,10 @@
+import { useAgency } from "@/context/AgencyContext";
 import { AgencyHubView } from "@/components/njm/AgencyHubView";
+import { DayCeroView } from "@/components/njm/DayCeroView";
 
 const Index = () => {
-  return <AgencyHubView />;
+  const { isSetupComplete } = useAgency();
+  return isSetupComplete ? <AgencyHubView /> : <DayCeroView />;
 };
 
 export default Index;
