@@ -1,0 +1,83 @@
+import { Plus, TrendingUp } from "lucide-react";
+
+interface Brand {
+  id: string;
+  name: string;
+  sector: string;
+  status: "Activo" | "En Setup" | "Pausado";
+  health: number;
+}
+
+const brands: Brand[] = [
+  { id: "1", name: "Disrupt", sector: "SaaS B2B", status: "Activo", health: 80 },
+  { id: "2", name: "NovaTech", sector: "FinTech", status: "Activo", health: 65 },
+  { id: "3", name: "Meridian", sector: "HealthTech", status: "En Setup", health: 30 },
+  { id: "4", name: "Apex Growth", sector: "E-Commerce", status: "Activo", health: 92 },
+  { id: "5", name: "Lumina AI", sector: "AI/ML", status: "Pausado", health: 45 },
+];
+
+const statusColors: Record<string, string> = {
+  Activo: "bg-pm/20 text-pm-fg",
+  "En Setup": "bg-agency/20 text-agency-fg",
+  Pausado: "bg-muted text-muted-foreground",
+};
+
+interface AgencyHubViewProps {
+  onBrandSelect: (brandId: string) => void;
+}
+
+export function AgencyHubView({ onBrandSelect }: AgencyHubViewProps) {
+  return (
+    <div className="flex flex-1 flex-col overflow-auto scrollbar-thin">
+      <header className="sticky top-0 z-10 border-b border-border bg-surface-0/80 px-8 py-5 backdrop-blur-sm">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          NJM OS — <span className="text-agency-fg">Hub de Agencia</span>
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">Gestiona todas tus marcas desde un solo lugar</p>
+      </header>
+
+      <main className="flex-1 p-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {brands.map((brand) => (
+            <button
+              key={brand.id}
+              onClick={() => onBrandSelect(brand.id)}
+              className="group relative rounded-xl border border-border bg-card p-5 text-left transition-all duration-200 hover:border-agency/40 hover:shadow-lg hover:shadow-agency/5 hover:-translate-y-0.5"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold text-foreground">{brand.name}</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{brand.sector}</p>
+                </div>
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium ${statusColors[brand.status]}`}>
+                  {brand.status}
+                </span>
+              </div>
+
+              <div className="mt-5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Salud del Libro Vivo</span>
+                  <span className="font-medium text-foreground">{brand.health}%</span>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-3">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-agency to-agency-fg transition-all duration-500"
+                    style={{ width: `${brand.health}%` }}
+                  />
+                </div>
+              </div>
+
+              <TrendingUp className="absolute bottom-4 right-4 h-4 w-4 text-muted-foreground/30 transition-colors group-hover:text-agency-fg/50" />
+            </button>
+          ))}
+
+          {/* Add new brand */}
+          <button className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-transparent p-5 text-muted-foreground transition-all duration-200 hover:border-agency/40 hover:text-agency-fg">
+            <Plus className="mb-2 h-6 w-6" />
+            <span className="text-sm font-medium">Agregar Marca</span>
+          </button>
+        </div>
+      </main>
+    </div>
+  );
+}
