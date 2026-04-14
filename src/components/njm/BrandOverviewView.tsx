@@ -13,6 +13,22 @@ export function BrandOverviewView() {
   const { isLibroVivoComplete } = useBrandContext();
   const libroSigned = isLibroVivoComplete(id || "");
 
+  if (!brand) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-muted-foreground">Marca no encontrada</p>
+      </div>
+    );
+  }
+
+  const workspaces = [
+    { label: "Agente CEO", desc: "Guardián del ADN · Vectores Estratégicos", icon: ShieldCheck, color: "ceo", path: `/brand/${id}/ceo` },
+    { label: "Agente PM", desc: "Operativo · Entregables y Frameworks", icon: Briefcase, color: "pm", path: `/brand/${id}/pm` },
+    ...(libroSigned
+      ? [{ label: "Libro Vivo", desc: "Fuente de verdad estratégica", icon: BookOpen, color: "pm" as const, path: `/brand/${id}/libro-vivo` }]
+      : []),
+  ];
+
   return (
     <div className="flex flex-1 flex-col overflow-auto scrollbar-thin animate-fade-in">
       <header className="sticky top-0 z-10 px-8 py-5 glass-subtle mx-4 mt-4 rounded-2xl">
