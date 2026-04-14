@@ -1,80 +1,106 @@
 
 
-# NJM OS — Cierre de Brechas (Parte 2)
+# NJM OS — Next Phase Recommendations
 
-4 mejoras para llevar el frontend de prototipo a producción.
-
----
-
-## A. Responsiveness (Adaptación Móvil)
-
-Los grids ya usan breakpoints (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`) en CEO y Hub. Las brechas reales son:
-
-- **DocumentSheet**: Forzado a `sm:max-w-[40vw]` — en móvil debe ser `w-full` (100%).
-- **ExecutionConsole**: Usa `left-16` (asume sidebar visible) — en móvil debe ser `left-0`.
-- **AppSidebar**: No tiene colapso móvil — necesita un hamburger menu o auto-hide bajo 768px.
-- **Floating action buttons**: `fixed bottom-8 left-1/2` puede solaparse con la consola en pantallas pequeñas.
-- **DataIngestionModal**: Ya es responsive por ser un Dialog centrado. Sin cambios.
-
-**Archivos a modificar**: `DocumentSheet.tsx`, `ExecutionConsole.tsx`, `AppSidebar.tsx`, `CEOWorkspaceView.tsx`, `PMWorkspaceView.tsx`
+Based on a full audit of the current codebase, here are the 5 highest-impact improvements to implement next, ordered by priority.
 
 ---
 
-## B. Error Boundaries + Skeletons
+## 1. Activity Feed / Notification Center
 
-- Crear un componente `ErrorBoundary.tsx` (React class component con `componentDidCatch`) que muestre un mensaje elegante con botón "Reintentar" cuando cualquier vista crashee.
-- Crear un componente `WorkspaceSkeleton.tsx` con cards tipo Skeleton (usando el `<Skeleton>` de Shadcn que ya existe) para mostrar mientras se cargan datos.
-- Envolver cada workspace (CEO, PM, LibroVivo, Hub) con el ErrorBoundary en `App.tsx`.
-- Agregar estados de carga simulados en las vistas (actualmente todo es síncrono, pero la estructura queda lista para cuando se conecte la API de Python).
+**Problem**: Users have no visibility into what happened across brands without clicking into each one. There's no cross-brand activity awareness.
 
-**Archivos a crear**: `src/components/njm/ErrorBoundary.tsx`, `src/components/njm/WorkspaceSkeleton.tsx`
-**Archivos a modificar**: `App.tsx` (envolver rutas con ErrorBoundary)
+**Solution**: Add a notification bell icon in the sidebar and an Activity Feed panel (Sheet/Drawer) that shows recent agent actions across all brands.
 
----
+**Implementation**:
+- Add `ActivityFeedDrawer.tsx` component using Shadcn Sheet
+- Add notification state to BrandContext (mock data: "CEO validated 3 vectors for NovaTech", "PM generated Business Case for Agencia-Disrupt")
+- Add bell icon with badge counter in AppSidebar
+- Feed items grouped by timestamp with agent color coding (purple for CEO actions, emerald for PM)
 
-## C. Micro-Animaciones (Framer Motion)
-
-No instalar `framer-motion` (dependencia pesada). En su lugar, usar CSS transitions + Tailwind `animate-*` que ya están configuradas, más agregar keyframes nuevos:
-
-- **Card status transition**: Cuando una card pasa de rojo a verde, agregar `transition-all duration-500` con un breve scale pulse (`scale-[1.03]` por 300ms).
-- **Sidebar active indicator**: Animar el indicator bar con `transition-all duration-300`.
-- **Execution Console steps**: Cada step que cambia a "done" hace un brief flash verde.
-- **Page transitions**: Agregar `animate-fade-in` a todas las vistas (ya presente en la mayoría, falta en Settings).
-
-**Archivos a modificar**: `tailwind.config.ts` (nuevos keyframes: `success-pulse`, `step-complete`), `CEOWorkspaceView.tsx` (card transition al validar), `index.css` (keyframes adicionales)
+**Files**: Create `ActivityFeedDrawer.tsx`, modify `AppSidebar.tsx`, `BrandContext.tsx`
 
 ---
 
-## D. Autenticación (Solo Estructura UI)
+## 2. Brand Detail / Overview Page
 
-No implementar auth real ahora (requiere backend). En su lugar, crear la **estructura UI** lista para conectar:
+**Problem**: Clicking a brand in the Hub jumps directly to the CEO workspace. There's no intermediate overview showing the brand's overall health, recent activity, and quick access to all workspaces.
 
-- Crear `LoginPage.tsx`: Página de login con campos email/password, botón "Iniciar Sesión", y branding NJM OS. Diseño glassmorphism consistente con el resto.
-- Crear un `AuthGuard.tsx` que simule protección de rutas (mock: siempre autenticado, pero la estructura queda para conectar Supabase Auth después).
-- Agregar ruta `/login` en `App.tsx`.
-- Agregar botón "Cerrar Sesión" en la parte inferior del sidebar.
+**Solution**: Create a Brand Overview page at `/brand/:id` that serves as a landing page before diving into CEO or PM.
 
-**Archivos a crear**: `src/pages/LoginPage.tsx`, `src/components/njm/AuthGuard.tsx`
-**Archivos a modificar**: `App.tsx`, `AppSidebar.tsx`
+**Implementation**:
+- Create `BrandOverviewPage.tsx` with: health score ring, vector completion progress, list of recent artifacts, quick-nav cards to CEO/PM/Libro Vivo
+- Update Hub card clicks to navigate to `/brand/:id` instead of `/brand/:id/ceo`
+- Add route in App.tsx
+
+**Files**: Create `BrandOverviewView.tsx`, `BrandOverviewPage.tsx`, modify `AgencyHubView.tsx`, `App.tsx`
 
 ---
 
-## Resumen de Cambios
+## 3. Search & Filter for Hub and Workspaces
 
-| Archivo | Acción | Brecha |
-|---------|--------|--------|
-| `DocumentSheet.tsx` | Editar — full-width en móvil | A |
-| `ExecutionConsole.tsx` | Editar — left-0 en móvil | A |
-| `AppSidebar.tsx` | Editar — colapso móvil + logout | A, D |
-| `CEOWorkspaceView.tsx` | Editar — card pulse animation | C |
-| `PMWorkspaceView.tsx` | Editar — floating button spacing | A |
-| `ErrorBoundary.tsx` | Crear | B |
-| `WorkspaceSkeleton.tsx` | Crear | B |
-| `LoginPage.tsx` | Crear | D |
-| `AuthGuard.tsx` | Crear | D |
-| `App.tsx` | Editar — ErrorBoundary + /login | B, D |
-| `tailwind.config.ts` | Editar — nuevos keyframes | C |
-| `index.css` | Editar — keyframes adicionales | C |
+**Problem**: With 5+ brands and 8+ vectors per brand, there's no way to search or filter content. As data grows this becomes unusable.
 
-Total: 6 archivos nuevos, 6 archivos editados. Sin dependencias nuevas.
+**Solution**: Add a search bar to the Hub header (filter brands by name/sector/status) and a filter toolbar to the CEO workspace (filter vectors by category or validation status).
+
+**Implementation**:
+- Add search input with Lucide `Search` icon in `AgencyHubView.tsx` header
+- Filter brands client-side by name, sector, and status
+- Add category filter chips in `CEOWorkspaceView.tsx` (All, Core, Business, Brand, Growth)
+- Add status filter toggle (Validated / Pending / All)
+
+**Files**: Modify `AgencyHubView.tsx`, `CEOWorkspaceView.tsx`
+
+---
+
+## 4. Export / Download Functionality
+
+**Problem**: The PM workspace shows artifacts (Business Case, OKRs, Roadmap) but there's no way to export or download them. For a corporate tool this is essential.
+
+**Solution**: Add export buttons to the DocumentSheet and Libro Vivo viewer that generate downloadable files.
+
+**Implementation**:
+- Add "Download as Markdown" button in `DocumentSheet.tsx` using Blob + URL.createObjectURL
+- Add "Export Libro Vivo" button in `LibroVivoViewer.tsx` header that generates a structured .md file with all vectors and PM matrix
+- Use toast feedback on export success
+
+**Files**: Modify `DocumentSheet.tsx`, `LibroVivoViewer.tsx`
+
+---
+
+## 5. Keyboard Shortcuts & Command Palette
+
+**Problem**: Power users (agency operators) need fast navigation. Currently everything requires mouse clicks.
+
+**Solution**: Add a Command Palette (Cmd+K) using the existing Shadcn `Command` component for quick navigation between brands, workspaces, and actions.
+
+**Implementation**:
+- Create `CommandPalette.tsx` using Shadcn `CommandDialog`
+- Register global `Cmd+K` / `Ctrl+K` listener
+- Commands: navigate to any brand, switch workspace (CEO/PM/Libro Vivo), open settings, trigger audit, logout
+- Show keyboard shortcut hint in sidebar footer
+
+**Files**: Create `CommandPalette.tsx`, modify `AppLayout.tsx`, `AppSidebar.tsx`
+
+---
+
+## Execution Order
+
+1. **Search & Filter** (quick win, improves usability immediately)
+2. **Brand Overview Page** (better information architecture)
+3. **Activity Feed** (cross-brand visibility)
+4. **Export/Download** (production requirement for corporate users)
+5. **Command Palette** (power-user polish)
+
+## Summary
+
+| Change | Type | Files |
+|--------|------|-------|
+| Search & Filter | Modify 2 | `AgencyHubView.tsx`, `CEOWorkspaceView.tsx` |
+| Brand Overview | Create 2, Modify 2 | New views + `App.tsx`, `AgencyHubView.tsx` |
+| Activity Feed | Create 1, Modify 2 | `ActivityFeedDrawer.tsx` + sidebar + context |
+| Export/Download | Modify 2 | `DocumentSheet.tsx`, `LibroVivoViewer.tsx` |
+| Command Palette | Create 1, Modify 2 | `CommandPalette.tsx` + layout + sidebar |
+
+Total: ~5 new files, ~6 modified. No new dependencies -- everything uses existing Shadcn components and Tailwind utilities.
 
