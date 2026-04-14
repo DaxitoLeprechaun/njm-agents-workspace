@@ -693,6 +693,83 @@ export function CEOWorkspaceView() {
         steps={executionSteps}
         agentLabel="Agente CEO"
       />
+
+      {/* Pull Request Review Modal */}
+      <Dialog open={!!reviewSubmission} onOpenChange={(open) => { if (!open) setReviewSubmission(null); }}>
+        <DialogContent className="max-w-4xl glass-strong border-pm/20" style={{ background: "hsla(220, 15%, 8%, 0.95)" }}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Eye className="h-5 w-5 text-pm-fg" />
+              Revisión — {reviewSubmission?.taskName}
+            </DialogTitle>
+          </DialogHeader>
+          {reviewSubmission && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Left: Context & Framework */}
+                <div className="rounded-xl p-4 glass">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Info className="h-4 w-4 text-ceo-fg" />
+                    <h3 className="text-sm font-semibold text-foreground">Contexto & Framework</h3>
+                    <span className="rounded-full px-2 py-0.5 text-[9px] font-medium bg-ceo/20 text-ceo-fg ml-auto">
+                      {reviewSubmission.framework}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line max-h-[300px] overflow-auto scrollbar-thin">
+                    {reviewSubmission.reasoning}
+                  </div>
+                </div>
+                {/* Right: Result */}
+                <div className="rounded-xl p-4 glass">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BookOpen className="h-4 w-4 text-pm-fg" />
+                    <h3 className="text-sm font-semibold text-foreground">Resultado del PM</h3>
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line max-h-[300px] overflow-auto scrollbar-thin">
+                    {reviewSubmission.resultPreview}
+                  </div>
+                </div>
+              </div>
+              {/* Feedback */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+                  Feedback (opcional)
+                </label>
+                <Textarea
+                  value={reviewFeedback}
+                  onChange={(e) => setReviewFeedback(e.target.value)}
+                  placeholder="Agregar comentarios o solicitar cambios..."
+                  className="glass border-white/10 text-sm min-h-[60px]"
+                />
+              </div>
+              {/* Actions */}
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setSubmissions((prev) => prev.map((s) => s.id === reviewSubmission.id ? { ...s, status: "rejected" as const } : s));
+                    toast.info(`Cambios solicitados: ${reviewSubmission.taskName}`);
+                    setReviewSubmission(null);
+                  }}
+                  className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-medium text-amber-400 glass-subtle hover:shadow-md transition-all"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" /> Pedir Cambios
+                </button>
+                <button
+                  onClick={() => {
+                    setSubmissions((prev) => prev.map((s) => s.id === reviewSubmission.id ? { ...s, status: "approved" as const } : s));
+                    toast.success(`Aprobado: ${reviewSubmission.taskName}`);
+                    setReviewSubmission(null);
+                  }}
+                  className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-medium text-white transition-all hover:shadow-xl"
+                  style={{ background: "hsla(160, 84%, 39%, 0.85)" }}
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Aprobar
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
