@@ -42,6 +42,16 @@ export function PMWorkspaceView() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeArtifact, setActiveArtifact] = useState<typeof artifacts[0] | null>(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <WorkspaceSkeleton cards={6} columns="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />;
+  }
+
   if (!brand) {
     return (
       <div className="flex flex-1 items-center justify-center">
@@ -52,16 +62,12 @@ export function PMWorkspaceView() {
 
   if (!isLibroVivoComplete(id || "")) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 animate-fade-in">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl glass">
-          <Lock className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <div className="text-center">
-          <h2 className="text-lg font-semibold text-foreground">Workspace Bloqueado</h2>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            El Agente CEO debe completar y firmar el Libro Vivo antes de acceder al workspace del PM.
-          </p>
-        </div>
+      <div className="flex flex-1 items-center justify-center">
+        <EmptyState
+          icon={Lock}
+          title="Workspace Bloqueado"
+          description="El Agente PM está esperando la firma del Libro Vivo para empezar a operar. Dirígete al workspace del CEO para completar la validación."
+        />
       </div>
     );
   }
