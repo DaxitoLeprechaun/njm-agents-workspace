@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -55,6 +55,56 @@
     --sidebar-border: 0 0% 100% / 0.5;
     --sidebar-ring: 210 100% 52%;
   }
+
+  .dark {
+    --background: 222 47% 5%;
+    --foreground: 210 20% 90%;
+    --card: 222 40% 8%;
+    --card-foreground: 210 20% 90%;
+    --popover: 222 40% 8%;
+    --popover-foreground: 210 20% 90%;
+    --primary: 210 100% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 30% 14%;
+    --secondary-foreground: 210 20% 85%;
+    --muted: 222 25% 12%;
+    --muted-foreground: 210 15% 55%;
+    --accent: 222 25% 14%;
+    --accent-foreground: 210 20% 90%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 20% 16%;
+    --input: 222 20% 14%;
+    --ring: 210 100% 52%;
+
+    /* Agent accents stay the same */
+    --agency-accent: 210 100% 52%;
+    --agency-accent-fg: 210 100% 62%;
+    --ceo-accent: 271 81% 56%;
+    --ceo-accent-fg: 271 70% 66%;
+    --pm-accent: 160 84% 39%;
+    --pm-accent-fg: 160 70% 50%;
+
+    /* Dark surface layers */
+    --surface-0: 222 47% 5%;
+    --surface-1: 222 40% 8%;
+    --surface-2: 222 30% 12%;
+    --surface-3: 222 25% 16%;
+
+    /* Dark glass tokens */
+    --glass-bg: 222 40% 10% / 0.6;
+    --glass-border: 0 0% 100% / 0.08;
+    --glass-shadow: 222 50% 3% / 0.4;
+
+    --sidebar-background: 222 40% 6% / 0.7;
+    --sidebar-foreground: 210 15% 65%;
+    --sidebar-primary: 210 100% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 25% 14%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 0 0% 100% / 0.06;
+    --sidebar-ring: 210 100% 52%;
+  }
 }
 
 @layer base {
@@ -80,12 +130,20 @@
     box-shadow: 0 8px 32px hsla(var(--glass-shadow)),
                 inset 0 1px 0 hsla(0, 0%, 100%, 0.4);
   }
+  .dark .glass {
+    box-shadow: 0 8px 32px hsla(var(--glass-shadow)),
+                inset 0 1px 0 hsla(0, 0%, 100%, 0.04);
+  }
   .glass-subtle {
     background: hsla(0, 0%, 100%, 0.35);
     border: 1px solid hsla(0, 0%, 100%, 0.5);
     backdrop-filter: blur(12px) saturate(1.2);
     -webkit-backdrop-filter: blur(12px) saturate(1.2);
     box-shadow: 0 4px 16px hsla(var(--glass-shadow));
+  }
+  .dark .glass-subtle {
+    background: hsla(222, 40%, 12%, 0.5);
+    border: 1px solid hsla(0, 0%, 100%, 0.06);
   }
   .glass-strong {
     background: hsla(0, 0%, 100%, 0.7);
@@ -94,5 +152,11 @@
     -webkit-backdrop-filter: blur(24px) saturate(1.5);
     box-shadow: 0 8px 32px hsla(var(--glass-shadow)),
                 inset 0 1px 0 hsla(0, 0%, 100%, 0.6);
+  }
+  .dark .glass-strong {
+    background: hsla(222, 40%, 10%, 0.8);
+    border: 1px solid hsla(0, 0%, 100%, 0.08);
+    box-shadow: 0 8px 32px hsla(var(--glass-shadow)),
+                inset 0 1px 0 hsla(0, 0%, 100%, 0.04);
   }
 }

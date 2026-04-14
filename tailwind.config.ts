@@ -13,7 +13,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "Fira Code", "monospace"],
+        mono: ["Fira Code", "JetBrains Mono", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
