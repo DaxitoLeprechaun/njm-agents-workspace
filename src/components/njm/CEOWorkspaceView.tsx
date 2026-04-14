@@ -214,7 +214,7 @@ export function CEOWorkspaceView() {
       </main>
 
       {/* Floating action */}
-      <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
+      <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2 px-4 w-full md:w-auto flex justify-center">
         <button
           onClick={handleAudit}
           disabled={isScanning || allValidated}
