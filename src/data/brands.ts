@@ -44,9 +44,9 @@ export interface TarjetaSugerenciaUI {
 
 // ─── Mock Data ───────────────────────────────────────────────────────
 export const brands: Brand[] = [
-  { id: "1", name: "Disrupt", sector: "SaaS B2B", status: "Activo", health: 80, libroVivoComplete: true },
+  { id: "1", name: "Agencia-Disrupt", sector: "SaaS B2B", status: "Activo", health: 80, libroVivoComplete: true },
   { id: "2", name: "NovaTech", sector: "FinTech", status: "Activo", health: 65, libroVivoComplete: false },
-  { id: "3", name: "Meridian", sector: "HealthTech", status: "En Setup", health: 30, libroVivoComplete: false },
+  { id: "3", name: "Agencia-X", sector: "HealthTech", status: "En Setup", health: 30, libroVivoComplete: false },
   { id: "4", name: "Apex Growth", sector: "E-Commerce", status: "Activo", health: 92, libroVivoComplete: true },
   { id: "5", name: "Lumina AI", sector: "AI/ML", status: "Pausado", health: 45, libroVivoComplete: false },
 ];
