@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare, Play, BookOpen } from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertTriangle, FileUp, MessageSquare, Play, BookOpen, Eye } from "lucide-react";
 import { getBrand } from "@/data/brands";
 import { useBrandContext } from "@/context/BrandContext";
 import { toast } from "sonner";
+import { DataIngestionModal } from "@/components/njm/DataIngestionModal";
+import { ExecutionConsole } from "@/components/njm/ExecutionConsole";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -16,10 +19,21 @@ export function CEOWorkspaceView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const brand = getBrand(id || "");
-  const { getVectors, toggleVector, isLibroVivoComplete, signLibroVivo, isScanning, scanningVectorId, runCEOAudit } = useBrandContext();
+  const { getVectors, toggleVector, isLibroVivoComplete, signLibroVivo, isScanning, scanningVectorId, executionSteps, runCEOAudit } = useBrandContext();
   const vectors = getVectors(id || "");
 
   const allValidated = vectors.length > 0 && vectors.every((v) => v.validated);
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"doc" | "briefing">("doc");
+  const [modalVector, setModalVector] = useState({ name: "", category: "" });
+
+  const openModal = (mode: "doc" | "briefing", vectorName: string, vectorCategory: string) => {
+    setModalMode(mode);
+    setModalVector({ name: vectorName, category: vectorCategory });
+    setModalOpen(true);
+  };
 
   const handleToggle = (vectorId: string) => {
     if (isScanning) return;
@@ -144,13 +158,19 @@ export function CEOWorkspaceView() {
                 {!v.validated && (
                   <div className="mt-4 flex gap-2">
                     <button
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openModal("doc", v.name, v.category);
+                      }}
                       className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 glass-subtle hover:shadow-md hover:text-foreground"
                     >
                       <FileUp className="h-3.5 w-3.5" /> Upload Doc
                     </button>
                     <button
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openModal("briefing", v.name, v.category);
+                      }}
                       className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 glass-subtle hover:shadow-md hover:text-foreground"
                     >
                       <MessageSquare className="h-3.5 w-3.5" /> Briefing
@@ -162,7 +182,7 @@ export function CEOWorkspaceView() {
           })}
         </div>
 
-        {/* Libro Vivo button */}
+        {/* Libro Vivo buttons */}
         {allValidated && !isLibroVivoComplete(id || "") && (
           <div className="mt-8 flex justify-center animate-fade-in">
             <button
@@ -177,11 +197,18 @@ export function CEOWorkspaceView() {
         )}
 
         {allValidated && isLibroVivoComplete(id || "") && (
-          <div className="mt-8 flex justify-center animate-fade-in">
+          <div className="mt-8 flex justify-center gap-3 animate-fade-in">
             <div className="flex items-center gap-2 rounded-2xl px-6 py-3 font-medium text-pm-fg glass-subtle">
               <CheckCircle2 className="h-5 w-5" />
               Libro Vivo Firmado
             </div>
+            <button
+              onClick={() => navigate(`/brand/${id}/libro-vivo`)}
+              className="flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-medium text-foreground transition-all glass-subtle hover:shadow-lg hover:scale-105"
+            >
+              <Eye className="h-4 w-4" />
+              Ver Libro Vivo
+            </button>
           </div>
         )}
       </main>
@@ -202,6 +229,22 @@ export function CEOWorkspaceView() {
           {isScanning ? "Escaneando…" : "Invocar CEO para Auditoría"}
         </button>
       </div>
+
+      {/* Data Ingestion Modal */}
+      <DataIngestionModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        mode={modalMode}
+        vectorName={modalVector.name}
+        vectorCategory={modalVector.category}
+      />
+
+      {/* Execution Console */}
+      <ExecutionConsole
+        visible={isScanning || executionSteps.length > 0}
+        steps={executionSteps}
+        agentLabel="Agente CEO"
+      />
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { Building, ShieldCheck, Briefcase, Settings, Hexagon } from "lucide-react";
+import { Building, ShieldCheck, Briefcase, Settings, Hexagon, BookOpen } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useBrandContext } from "@/context/BrandContext";
 
 const navItems = [
-  { path: "/", icon: Building, label: "Agency Hub", color: "agency" },
+  { path: "/", icon: Building, label: "Hub de Agencias", color: "agency" },
 ] as const;
 
 const agentItems = [
@@ -15,23 +16,22 @@ const colorMap: Record<string, string> = {
   agency: "border-agency text-agency",
   ceo: "border-ceo text-ceo",
   pm: "border-pm text-pm",
+  libro: "border-pm text-pm",
 };
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+  const { isLibroVivoComplete } = useBrandContext();
 
   const currentPath = location.pathname;
-
-  const getActiveColor = () => {
-    if (currentPath.includes("/ceo")) return "ceo";
-    if (currentPath.includes("/pm")) return "pm";
-    return "agency";
-  };
+  const libroAvailable = id ? isLibroVivoComplete(id) : false;
 
   const isActive = (check: string) => {
     if (check === "/") return currentPath === "/";
+    if (check === "libro-vivo") return currentPath.includes("/libro-vivo");
+    if (check === "settings") return currentPath === "/settings";
     return currentPath.includes(`/${check}`);
   };
 
@@ -74,17 +74,30 @@ export function AppSidebar() {
             />
           );
         })}
+
+        {/* Libro Vivo - only when signed */}
+        {libroAvailable && id && (
+          <>
+            <div className="my-2 h-px w-6 bg-border/30" />
+            <SidebarButton
+              icon={BookOpen}
+              label="Libro Vivo"
+              active={isActive("libro-vivo")}
+              colorClass={colorMap.libro}
+              onClick={() => navigate(`/brand/${id}/libro-vivo`)}
+            />
+          </>
+        )}
       </nav>
 
-      {/* Bottom */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button className="rounded-xl p-2.5 text-muted-foreground transition-all duration-300 hover:text-foreground glass-subtle hover:shadow-lg">
-            <Settings className="h-5 w-5" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="right">Configuración</TooltipContent>
-      </Tooltip>
+      {/* Settings */}
+      <SidebarButton
+        icon={Settings}
+        label="Configuración"
+        active={isActive("settings")}
+        colorClass="border-border text-foreground"
+        onClick={() => navigate("/settings")}
+      />
     </aside>
   );
 }
