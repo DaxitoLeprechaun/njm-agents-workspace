@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings, Key, FolderOpen, Building, Eye, EyeOff, Trash2, Moon, Sun } from "lucide-react";
+import { Settings, FolderOpen, Building, Trash2, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
@@ -25,8 +25,6 @@ function getInitialDark(): boolean {
 }
 
 export function SettingsView() {
-  const [apiKey, setApiKey] = useState("");
-  const [showKey, setShowKey] = useState(false);
   const [exportPath, setExportPath] = useState("/Users/tu-usuario/NJM_OS/Marcas/");
   const [isDark, setIsDark] = useState(getInitialDark);
   const [brandNames, setBrandNames] = useState<Record<string, string>>(() => {
@@ -95,11 +93,8 @@ export function SettingsView() {
 
       <main className="flex-1 p-8">
         <div className="mx-auto max-w-2xl">
-          <Tabs defaultValue="api" className="space-y-6">
+          <Tabs defaultValue="paths" className="space-y-6">
             <TabsList className="glass-subtle border-none">
-              <TabsTrigger value="api" className="data-[state=active]:glass data-[state=active]:shadow-md">
-                <Key className="mr-1.5 h-4 w-4" /> API Keys
-              </TabsTrigger>
               <TabsTrigger value="paths" className="data-[state=active]:glass data-[state=active]:shadow-md">
                 <FolderOpen className="mr-1.5 h-4 w-4" /> Rutas
               </TabsTrigger>
@@ -107,33 +102,6 @@ export function SettingsView() {
                 <Building className="mr-1.5 h-4 w-4" /> Marcas
               </TabsTrigger>
             </TabsList>
-
-            {/* API Keys */}
-            <TabsContent value="api" className="space-y-6">
-              <div className="rounded-2xl p-6 glass space-y-4">
-                <div>
-                  <h3 className="font-medium text-foreground">Anthropic API Key</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Clave para Claude 3.5 Sonnet. Se almacena localmente.
-                  </p>
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showKey ? "text" : "password"}
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="sk-ant-api03-..."
-                    className="pr-10 glass-subtle border-none"
-                  />
-                  <button
-                    onClick={() => setShowKey(!showKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-            </TabsContent>
 
             {/* Local Paths */}
             <TabsContent value="paths" className="space-y-6">
