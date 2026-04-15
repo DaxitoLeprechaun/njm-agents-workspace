@@ -1,68 +1,85 @@
 
 
-# CEO Dashboard — 4 Nucleos Principales
+# PM Workspace — 4 Nucleos (Modo Ejecucion)
 
-## Resumen
-
-Reorganizar el Phase 2 (Modo Gestion) del CEO en **4 modulos visuales** claros, reemplazando el layout actual de 2 columnas + autonomy slider suelto.
+Rewrite completo del `PMWorkspaceView.tsx` para transformarlo de un grid de artefactos a un dashboard tactico de 4 nucleos, coherente con la estructura del CEO.
 
 ```text
 ┌─────────────────────────────────────────────────────┐
-│  HEADER (breadcrumb + titulo)                       │
+│  HEADER (breadcrumb: Hub > Brand > Agente PM)       │
 ├─────────────────────────────────────────────────────┤
-│  NUCLEO 1: Estado del Agente CEO                    │
-│  [Salud 100%] [Ver Libro] [Consola] [Config]        │
-│  Autonomia slider + config colapsable               │
+│  NUCLEO 1: Contexto Operativo y Estado              │
+│  [Salud PM 100%] [Épica Activa] [Terminal] [Config] │
+│  Panel de Constraints (restricciones del PM)        │
 ├───────────────────────┬─────────────────────────────┤
 │  NUCLEO 2:            │  NUCLEO 3:                  │
-│  Tareas Pendientes    │  Pendientes por Aprobar     │
-│  (Roadmap del CEO +   │  (Bandeja de Revision       │
-│   delegaciones al PM) │   del PM)                   │
+│  Motor de Desglose    │  Tablero Táctico (Kanban)   │
+│  (Tree-view de sub-   │  Backlog | Ejecutando |     │
+│   tareas generadas)   │  En Revisión | Completado   │
 ├───────────────────────┴─────────────────────────────┤
-│  NUCLEO 4: Core de Contrataciones                   │
-│  [Agente PM ✓ Activo] [Agente MKT 🔒] [Agente X 🔒]│
-│  Contratar / Configurar agentes subordinados        │
+│  NUCLEO 4: Terminal de Producción (Split View)      │
+│  Izq: Contexto/fuentes  │  Der: Output generado     │
 └─────────────────────────────────────────────────────┘
 ```
 
-## Cambios en `CEOWorkspaceView.tsx`
+---
 
-### Nucleo 1 — Estado del Agente CEO (ya existe, se mantiene)
-- Command bar actual con salud, Ver Libro Vivo, Consola, Configuracion
-- Autonomy slider y config colapsable se quedan aqui
-- Sin cambios significativos, solo agrupacion visual con titulo "Estado del Agente"
+## Datos — `src/data/pmManagement.ts` (nuevo)
 
-### Nucleo 2 — Tareas Pendientes (ya existe como "Roadmap del CEO")
-- Se mantiene igual: lista de tareas con iconos, "Ejecutar Tarea" y "Delegar al PM"
-- Se le agrega un header mas prominente: "Tareas Pendientes" con badge de conteo
+Types and mock data:
 
-### Nucleo 3 — Pendientes por Aprobar (ya existe como "Bandeja de Revision")
-- Se mantiene igual: submissions del PM con bottleneck glow, botones Aprobar/Rechazar
-- Sin cambios funcionales
+- **Epic**: `{ id, title, assignedBy: "CEO", status, constraints: string[] }` — the active objective from the CEO
+- **PMSubTask**: `{ id, epicId, title, type, status: 'backlog'|'executing'|'review'|'done', priority }` — breakdown items
+- **KanbanColumn**: 4 columns (Backlog, Ejecutando, En Revisión CEO, Completado)
+- **ProductionContext**: `{ sources: string[], taskTitle, contextSnippet, generatedOutput }` — split view data
+- **PMConstraint**: `{ id, label, active: boolean }` — restrictions like "Budget <$5K", "Deadline Q3"
 
-### Nucleo 4 — Core de Contrataciones (NUEVO)
-- Grid de tarjetas de agentes disponibles para "contratar":
-  - **Agente PM**: estado activo si ya fue inicializado, con boton "Ir al PM" o "Inicializar"
-  - **Agente de Marketing**: bloqueado (coming soon), icono lock
-  - **Agente de Ventas**: bloqueado (coming soon)
-- Cada tarjeta muestra: icono del agente, nombre, estado (Activo/Bloqueado), skills asignadas
-- El boton "Inicializar Agente PM" se mueve aqui desde donde esta actualmente suelto
-- Los selectores de skills del PM tambien se mueven a este nucleo (dentro de la tarjeta del PM)
+Mock: 1 active epic ("Estrategia de Lanzamiento LATAM"), 6-8 sub-tasks across kanban columns, 3 constraints, production context for one active task.
 
-### Reorganizacion del layout
-- Nucleo 1: full-width bar (como esta)
-- Nucleos 2 y 3: grid 2 columnas (como esta)
-- Nucleo 4: full-width section debajo, con grid de 3 tarjetas de agentes
+## UI — Rewrite `PMWorkspaceView.tsx`
 
-### Mock data para agentes
-- Agregar a `ceoManagement.ts` un array `AVAILABLE_AGENTS` con 3 entries (PM, Marketing, Ventas) con campos: id, name, icon, status, skills, color
+### Header
+- Keep existing breadcrumb (Hub > Brand > Agente PM)
+- Update subtitle to "Modo Ejecución · Agente PM"
 
-## Archivos
+### Nucleo 1 — Contexto Operativo
+- Health ring (reuse pattern from CEO) showing PM health at 100%
+- **Épica Activa** card: shows the CEO-assigned epic title + description prominently
+- Action buttons: "Ver Terminal" (toggle console), "Constraints" (toggle collapsible)
+- Collapsible **Constraints panel**: list of toggleable restriction badges (budget, timeline, scope limits)
 
-| Archivo | Accion |
-|---------|--------|
-| `src/data/ceoManagement.ts` | Agregar tipos y mock de agentes disponibles |
-| `src/components/njm/CEOWorkspaceView.tsx` | Reorganizar Phase 2 en 4 nucleos |
+### Nucleo 2 — Motor de Desglose (Breakdown Engine)
+- Glass card with tree-view/nested list of sub-tasks derived from the active epic
+- Each item: checkbox-style status dot, title, type icon (`Search` for research, `Table` for data, `FileText` for doc)
+- Footer buttons: "Re-generar Desglose" (re-shuffle sub-tasks with toast) and "Agregar Sub-tarea" (adds placeholder)
+- Indented children with subtle left border line for hierarchy
 
-Total: 2 archivos modificados. Sin dependencias nuevas.
+### Nucleo 3 — Tablero Táctico (Mini Kanban)
+- 4 columns as vertical stacked lists (not horizontal scroll — fits the viewport)
+- Column headers with dot + count badge: `Backlog (3)`, `Ejecutando (1)`, `En Revisión CEO (1)`, `Completado (2)`
+- Task cards: compact — ID tag, title, priority dot (red/amber/green), type icon
+- Cards in "En Revisión CEO" get the bottleneck glow if >4h (reuse `isBottleneck`)
+- Click a card → selects it for the Terminal de Producción (Nucleo 4)
+
+### Nucleo 4 — Terminal de Producción (Split View)
+- Full-width section, divided 40/60
+- **Left panel**: "Contexto" — shows source snippets (Libro Vivo fragments, frameworks referenced), monospace, dark glass
+- **Right panel**: "Output" — shows generated content (markdown-style formatted text), slightly lighter glass
+- Header shows the selected task name + status badge
+- If no task selected, show empty state: "Selecciona una tarea del tablero para ver su producción"
+
+### Floating Action Button
+- Keep existing pattern but label: "Ejecutar Tarea Seleccionada"
+- Triggers `runPMExecution` from BrandContext (reuses existing execution console)
+
+---
+
+## Files
+
+| File | Action |
+|------|--------|
+| `src/data/pmManagement.ts` | Create — types, mock data for epics, sub-tasks, kanban, constraints, production context |
+| `src/components/njm/PMWorkspaceView.tsx` | Rewrite — 4-nucleus layout replacing artifact grid |
+
+Total: 1 new file, 1 modified. No new dependencies.
 
