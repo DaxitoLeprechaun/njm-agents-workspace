@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings, Key, FolderOpen, Building, Eye, EyeOff, Trash2, Moon, Sun } from "lucide-react";
+import { Settings, FolderOpen, Building, Trash2, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
