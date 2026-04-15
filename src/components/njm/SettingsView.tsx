@@ -93,7 +93,7 @@ export function SettingsView() {
 
       <main className="flex-1 p-8">
         <div className="mx-auto max-w-2xl">
-          <Tabs defaultValue="api" className="space-y-6">
+          <Tabs defaultValue="paths" className="space-y-6">
             <TabsList className="glass-subtle border-none">
               <TabsTrigger value="paths" className="data-[state=active]:glass data-[state=active]:shadow-md">
                 <FolderOpen className="mr-1.5 h-4 w-4" /> Rutas
